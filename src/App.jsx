@@ -3,7 +3,7 @@ import FaceIcon from '@mui/icons-material/Face';
 import Face2Icon from '@mui/icons-material/Face2';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Button, Chip, Dialog, DialogContent, DialogContentText, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
+import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useEffect, useState } from 'react';
 import './App.css';
@@ -13,9 +13,31 @@ const messageListStyles = {
   overflowY: 'auto'
 };
 
+const Bubble = ({ message, color, icon }) => {
+  const styles = {
+    color,
+    borderColor: color,
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderRadius: '.8rem',
+    display: 'flex',
+    gap: '.5rem',
+    alignSelf: 'flex-start',
+    alignItems: 'center',
+    padding: '.5rem',
+    fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+    fontSize: '0.9rem',
+    whiteSpace: 'pre',
+  };
+  return (
+    <div style={styles}>
+      { icon } { message }
+    </div>
+  );
+};
+
 const chipStyles = {
-  alignSelf: 'flex-start',
-  padding: '1.2rem .5rem',
+
 };
 
 const SettingsDialog = ({ open, setOpen, domain, setDomain, token, setToken }) => {
@@ -152,13 +174,11 @@ const App = () => {
       </Stack>
       <Stack id="message-list" flexGrow={1} gap={1.5} sx={messageListStyles}>
           { messages.map((message, index) => (
-            <Chip
+            <Bubble
               key={index}
-              label={message}
-              variant="outlined"
-              color={index % 2 === 0 ? 'primary' : 'secondary'}
+              message={message}
+              color={index % 2 === 0 ? 'rgb(25, 118, 210)' : 'rgb(156, 39, 176)'}
               icon={index % 2 === 0 ? <FaceIcon /> : <Face2Icon />}
-              sx={chipStyles}
             />
           )) }
       </Stack>
