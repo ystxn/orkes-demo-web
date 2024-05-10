@@ -1,9 +1,11 @@
-import LoadingButton from '@mui/lab/LoadingButton';
-import { Chip, Stack, Typography } from '@mui/material';
-import TextField from '@mui/material/TextField';
-import { useState, useEffect } from 'react';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FaceIcon from '@mui/icons-material/Face';
 import Face2Icon from '@mui/icons-material/Face2';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Button, Chip, Dialog, DialogContent, DialogContentText, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import { useEffect, useState } from 'react';
 import './App.css';
 
 const messageListStyles = {
@@ -16,20 +18,79 @@ const chipStyles = {
   padding: '1.2rem .5rem',
 };
 
+const SettingsDialog = ({ open, setOpen, domain, setDomain, token, setToken }) => {
+  const handleClose = (_, reason) => {
+    if (reason !== 'backdropClick') {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+    >
+      <DialogTitle>Settings</DialogTitle>
+      <DialogContent>
+        <Stack gap={1}>
+          <DialogContentText>
+            Set your cluster's domain and copy the token
+          </DialogContentText>
+          <TextField
+            required
+            margin="dense"
+            name="cluster"
+            label="Cluster Subdomain"
+            value={domain}
+            onChange={(event) => setDomain(event.target.value)}
+            fullWidth
+          />
+          <TextField
+            required
+            margin="dense"
+            name="token"
+            label="Token Subdomain"
+            value={token}
+            onChange={(event) => setToken(event.target.value)}
+            fullWidth
+          />
+          <Button variant="contained" onClick={handleClose}>Close</Button>
+        </Stack>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const App = () => {
-  const [ domain, setDomain ] = useState('ys');
-  const [ token, setToken ] = useState('eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtqbVlNWThEV2VOU1lKZmZSSjFXNSJ9.eyJnaXZlbl9uYW1lIjoiWW9uZyBTaGVuZyIsImZhbWlseV9uYW1lIjoiVGFuIiwibmlja25hbWUiOiJ5b25nc2hlbmcudGFuIiwibmFtZSI6IllvbmcgU2hlbmcgVGFuIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0oxc0R5RTh2eS1TUUNoTUF1OFp3dVdFOGl5SVFRZGtJZnN0NkIxQWI5bkNXcHNHQT1zOTYtYyIsImxvY2FsZSI6ImVuIiwidXBkYXRlZF9hdCI6IjIwMjQtMDUtMTBUMDI6MTQ6MzMuODcxWiIsImVtYWlsIjoieW9uZ3NoZW5nLnRhbkBvcmtlcy5pbyIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2F1dGgub3JrZXMuaW8vIiwiYXVkIjoiQzAwRlVaUW5BaEJCOU54cGtEaWtnazVZb25DOFVpa1ciLCJpYXQiOjE3MTUzMDcyNzQsImV4cCI6MTcxNTM0MzI3NCwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMDk0NTkxNjM0OTM5NTg0NjU5NDciLCJzaWQiOiJ6VVl2RmdvTDE5cHc2UnpvbHphQ3JKQmo5UkNJN2w1QSIsIm5vbmNlIjoiU21OV1ZGOU9ValJaWkdSWmNUazNXVkJqUTAxMmRIQkNjVWhxY1ZCbWFXcGFUMDFXWDNsaGNuWnlNdz09In0.E6xxxDv6cf4O88SaP7DHp_-mxGlMBSchz9gpgxXYeUGtth5OOw7Q-ay5m7Gu68zbv_8XdBVXZ8zbAMrG-JOof0Bp25f53glFq1E1aUFUT95mmqrEgcQMi8lG7AOqtYhLtas4ts2AU2tLBO_VuD5GNOvhmNNEm_ZOd3Fi-VCOL4OtbROiiRCuEIv4MgT7s257X5OHIWkPs2O1nGKzaR0H1A3ewwivrP3gnX6cSpa1_byhSRxH6V1JfoNtCmxaMHMWY1LASKfsf48MPqtaSeYZctko8dSAqIfvUxyFBXK7clL8BXFEziU6rHKoN8wvag1y_R0woOHcxnjYqhk_nSK9NA');
+  const [ settingsDialogOpen, setSettingsDialogOpen ] = useState(false);
+  const [ domain, setDomain ] = useState(null);
+  const [ token, setToken ] = useState(null);
   const [ loading, setLoading ] = useState(false);
-  const [ messages, setMessages ] = useState([ "Hello, there" ]);
+  const [ messages, setMessages ] = useState([]);
   const [ input, setInput ] = useState("List the top 5 companies by their recently reported results");
 
   useEffect(() => {
-    const data = [
-      "hello, there",
-      "yes okay"
-    ];
-    setMessages(data);
+    setDomain(window.localStorage.getItem('domain') || 'ys');
+    setToken(window.localStorage.getItem('token') || '');
+    const storedMessages = window.localStorage.getItem('messages');
+    setMessages(storedMessages ? JSON.parse(storedMessages) : [ 'Hello there' ]);
   }, []);
+
+  useEffect(() => {
+    if (domain) {
+      window.localStorage.setItem('domain', domain);
+    }
+  }, [ domain ]);
+  useEffect(() => {
+    if (token) {
+      window.localStorage.setItem('token', token);
+    }
+  }, [ token ]);
+  useEffect(() => {
+    if (messages?.length > 0) {
+      window.localStorage.setItem('messages', JSON.stringify(messages));
+    }
+  } , [ messages ]);
 
   const addMessage = (newMessage) => {
     setMessages((old) => [ ...old, newMessage ]);
@@ -57,18 +118,38 @@ const App = () => {
       }),
     };
     fetch('/express-api/', config)
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error(JSON.stringify(response));
+        }
+      })
       .then((response) => {
         addMessage(response.result);
         setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        setMessages((old) => [ ...old, 'Error: ' + error ])
       });
   };
 
   return (
     <Stack gap={2} flexGrow={1}>
-      <Typography variant="h5">
-        News Index Search
-      </Typography>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography variant="h5">
+          News Index Search
+        </Typography>
+        <Stack direction="row">
+          <IconButton color="error" onClick={() => setMessages([ 'Hello there' ])}>
+            <DeleteForeverIcon />
+          </IconButton>
+          <IconButton color="info" onClick={() => setSettingsDialogOpen(true)}>
+            <SettingsIcon />
+          </IconButton>
+        </Stack>
+      </Stack>
       <Stack id="message-list" flexGrow={1} gap={1.5} sx={messageListStyles}>
           { messages.map((message, index) => (
             <Chip
@@ -99,6 +180,14 @@ const App = () => {
           Ask
         </LoadingButton>
       </Stack>
+      <SettingsDialog
+        open={settingsDialogOpen}
+        setOpen={setSettingsDialogOpen}
+        domain={domain}
+        setDomain={setDomain}
+        token={token}
+        setToken={setToken}
+      />
     </Stack>
   )
 };
