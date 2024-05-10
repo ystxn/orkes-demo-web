@@ -1,0 +1,13 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+#root {
+    display: flex;
+    flex: 1 1 1px;
+    flex-direction: column;
+    padding: 1rem;
+}
