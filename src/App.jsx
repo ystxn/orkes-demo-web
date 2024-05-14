@@ -28,6 +28,7 @@ const Bubble = ({ message, color, icon }) => {
     fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
     fontSize: '0.9rem',
     whiteSpace: 'pre',
+    textWrap: 'wrap',
   };
   return (
     <div style={styles}>
