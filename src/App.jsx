@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import './App.css';
 
 const messageListStyles = {
-  height: 'calc(100vh - 12rem)',
+  height: 'calc(100dvh - 12rem)',
   overflowY: 'auto'
 };
 
