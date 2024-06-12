@@ -6,7 +6,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useEffect, useState } from 'react';
-import './App.css';
+import './news-index-search.css';
 
 const messageListStyles = {
   height: 'calc(100dvh - 12rem)',
@@ -84,13 +84,14 @@ const SettingsDialog = ({ open, setOpen, domain, setDomain, token, setToken }) =
   );
 };
 
-const App = () => {
+const NewsIndexSearch = ({ identity }) => {
   const [ settingsDialogOpen, setSettingsDialogOpen ] = useState(false);
   const [ domain, setDomain ] = useState(null);
   const [ token, setToken ] = useState(null);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState([]);
   const [ input, setInput ] = useState("List the top 5 companies by their recently reported results");
+  const origin = window.location.hostname === 'localhost' ? 'http://localhost:8080' : '';
 
   useEffect(() => {
     setDomain(window.localStorage.getItem('domain') || 'ys');
@@ -132,30 +133,25 @@ const App = () => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${identity}`,
       },
-      body: JSON.stringify({
-        domain,
-        token,
-        path: '/api/workflow/execute/news-context-search',
-        body: { query: input },
-      }),
+      body: JSON.stringify({ query: input }),
     };
-    fetch('/express-api/', config)
+    fetch(`${origin}/demo/api/execute/news-context-search/1`, config)
       .then((response) => {
         if (response.ok) {
           return response.json();
         } else {
+          console.log('not ok')
           throw new Error(JSON.stringify(response));
         }
       })
-      .then((response) => {
-        addMessage(response.result);
-        setLoading(false);
-      })
+      .then((response) => addMessage(response.result))
       .catch((error) => {
-        setLoading(false);
-        setMessages((old) => [ ...old, 'Error: ' + error ])
-      });
+        console.log(error)
+        setMessages((old) => [ ...old, 'Error: ' + error ]);
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -213,4 +209,4 @@ const App = () => {
   )
 };
 
-export default App;
+export default NewsIndexSearch;
