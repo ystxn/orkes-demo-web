@@ -26,15 +26,17 @@ const BubbleRoot = styled.div`
   border-color: ${props => props.color};
   border-width: 1px;
   border-style: solid;
-  border-radius: .8rem;
+  border-radius: .6rem;
   display: flex;
   gap: .5rem;
   align-self: flex-start;
   align-items: center;
   padding: .5rem;
+  margin-right: .7rem;
   font-family: Roboto, Helvetica, Arial, sans-serif;
   font-size: .9rem;
   white-space: pre;
+  text-wrap: wrap;
 `;
 
 const Bubble = ({ message, color, icon }) => (
