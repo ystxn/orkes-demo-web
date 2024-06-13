@@ -1,128 +1,72 @@
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FaceIcon from '@mui/icons-material/Face';
 import Face2Icon from '@mui/icons-material/Face2';
-import SettingsIcon from '@mui/icons-material/Settings';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
+import { IconButton, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import './news-index-search.css';
 
-const messageListStyles = {
-  height: 'calc(100dvh - 12rem)',
-  overflowY: 'auto'
-};
+const Root = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 1px;
+  gap: 1rem;
+`;
 
-const Bubble = ({ message, color, icon }) => {
-  const styles = {
-    color,
-    borderColor: color,
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderRadius: '.8rem',
-    display: 'flex',
-    gap: '.5rem',
-    alignSelf: 'flex-start',
-    alignItems: 'center',
-    padding: '.5rem',
-    fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
-    fontSize: '0.9rem',
-    whiteSpace: 'pre',
-    textWrap: 'wrap',
-  };
-  return (
-    <div style={styles}>
-      { icon } { message }
-    </div>
-  );
-};
+const MessageStack = styled(Stack)`
+  overflow-y: auto;
+  flex: 1 1 1px;
+  gap: .8em;
+`
 
-const chipStyles = {
+const BubbleRoot = styled.div`
+  color: ${props => props.color};
+  border-color: ${props => props.color};
+  border-width: 1px;
+  border-style: solid;
+  border-radius: .8rem;
+  display: flex;
+  gap: .5rem;
+  align-self: flex-start;
+  align-items: center;
+  padding: .5rem;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: .9rem;
+  white-space: pre;
+`;
 
-};
-
-const SettingsDialog = ({ open, setOpen, domain, setDomain, token, setToken }) => {
-  const handleClose = (_, reason) => {
-    if (reason !== 'backdropClick') {
-      setOpen(false);
-    }
-  };
-
-  return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-    >
-      <DialogTitle>Settings</DialogTitle>
-      <DialogContent>
-        <Stack gap={1}>
-          <DialogContentText>
-            Set your cluster's domain and copy the token
-          </DialogContentText>
-          <TextField
-            required
-            margin="dense"
-            name="cluster"
-            label="Cluster Subdomain"
-            value={domain}
-            onChange={(event) => setDomain(event.target.value)}
-            fullWidth
-          />
-          <TextField
-            required
-            margin="dense"
-            name="token"
-            label="Token Subdomain"
-            value={token}
-            onChange={(event) => setToken(event.target.value)}
-            fullWidth
-          />
-          <Button variant="contained" onClick={handleClose}>Close</Button>
-        </Stack>
-      </DialogContent>
-    </Dialog>
-  );
-};
+const Bubble = ({ message, color, icon }) => (
+  <BubbleRoot color={color}>
+    { icon } { message }
+  </BubbleRoot>
+);
 
 const NewsIndexSearch = ({ identity }) => {
-  const [ settingsDialogOpen, setSettingsDialogOpen ] = useState(false);
-  const [ domain, setDomain ] = useState(null);
-  const [ token, setToken ] = useState(null);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState([]);
   const [ input, setInput ] = useState("List the top 5 companies by their recently reported results");
   const origin = window.location.hostname === 'localhost' ? 'http://localhost:8080' : '';
 
+  const scrollToBottom = () => {
+    const messageList = document.querySelector('#message-list');
+    messageList.scrollTop = messageList.scrollHeight;
+  };
+
   useEffect(() => {
-    setDomain(window.localStorage.getItem('domain') || 'ys');
-    setToken(window.localStorage.getItem('token') || '');
     const storedMessages = window.localStorage.getItem('messages');
     setMessages(storedMessages ? JSON.parse(storedMessages) : [ 'Hello there' ]);
   }, []);
 
   useEffect(() => {
-    if (domain) {
-      window.localStorage.setItem('domain', domain);
-    }
-  }, [ domain ]);
-  useEffect(() => {
-    if (token) {
-      window.localStorage.setItem('token', token);
-    }
-  }, [ token ]);
-  useEffect(() => {
     if (messages?.length > 0) {
+      setTimeout(scrollToBottom, 50);
       window.localStorage.setItem('messages', JSON.stringify(messages));
     }
   } , [ messages ]);
 
-  const addMessage = (newMessage) => {
-    setMessages((old) => [ ...old, newMessage ]);
-    setTimeout(() => {
-      const messageList = document.querySelector('#message-list');
-      messageList.scrollTop = messageList.scrollHeight;
-    }, 50);
-  };
+  const addMessage = (newMessage) => setMessages((old) => [ ...old, newMessage ]);
 
   const fireQuery = () => {
     setLoading(true);
@@ -155,21 +99,16 @@ const NewsIndexSearch = ({ identity }) => {
   };
 
   return (
-    <Stack gap={2} flexGrow={1}>
+    <Root>
       <Stack direction="row" justifyContent="space-between">
         <Typography variant="h5">
           News Index Search
         </Typography>
-        <Stack direction="row">
-          <IconButton color="error" onClick={() => setMessages([ 'Hello there' ])}>
-            <DeleteForeverIcon />
-          </IconButton>
-          <IconButton color="info" onClick={() => setSettingsDialogOpen(true)}>
-            <SettingsIcon />
-          </IconButton>
-        </Stack>
+        <IconButton color="error" onClick={() => setMessages([ 'Hello there' ])}>
+          <DeleteForeverIcon />
+        </IconButton>
       </Stack>
-      <Stack id="message-list" flexGrow={1} gap={1.5} sx={messageListStyles}>
+      <MessageStack id="message-list">
           { messages.map((message, index) => (
             <Bubble
               key={index}
@@ -178,7 +117,7 @@ const NewsIndexSearch = ({ identity }) => {
               icon={index % 2 === 0 ? <FaceIcon /> : <Face2Icon />}
             />
           )) }
-      </Stack>
+      </MessageStack>
       <Stack gap={2} direction="row">
         <TextField
           fullWidth
@@ -197,15 +136,7 @@ const NewsIndexSearch = ({ identity }) => {
           Ask
         </LoadingButton>
       </Stack>
-      <SettingsDialog
-        open={settingsDialogOpen}
-        setOpen={setSettingsDialogOpen}
-        domain={domain}
-        setDomain={setDomain}
-        token={token}
-        setToken={setToken}
-      />
-    </Stack>
+    </Root>
   )
 };
 
