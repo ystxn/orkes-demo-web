@@ -1,42 +1,71 @@
-import { useState, useEffect } from 'react';
-import NewsIndexSearch from './news-index-search';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import Button from '@mui/material/Button';
 import styled from 'styled-components';
+import { Typography } from '@mui/material';
+import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
+import SemanticSearch from './semantic-search';
+import Approvals from './approvals';
+import { createContext } from 'react';
 
-const LoginRoot = styled.div`
-    height: 100%;
+const NavBarRoot = styled.div`
     display: flex;
-    justify-content: center;
     align-items: center;
+    background-color: #6c37bd;
+    padding: .5rem;
 `;
 
-export default () => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    const [ identity, setIdentity ] = useState('');
+const Brand = styled(Typography)`
+    text-transform: uppercase;
+    color: white;
+    padding-right: 1.5rem;
+`;
 
-    const storeIdentity = ({ credential }) => {
-        console.debug('Setting identity', credential);
-        window.localStorage.setItem('identity', credential);
-        setIdentity(credential);
-    };
+const NavButton = styled(Button)`
+    color: white !important;
+    display: block;
+`;
 
-    useEffect(() => {
-        const storedIdentity = window.localStorage.getItem('identity');
-        if (storedIdentity) {
-            console.debug('Restoring identity', storedIdentity);
-            setIdentity(storedIdentity);
-        }
-    }, []);
+const ContentRoot = styled.div`
+    padding: .5rem;
+    height: 100%;
+    display: flex;
+    flex: 1 1 1px;
+`;
 
-    const Login = () => (
-        <LoginRoot>
-            <GoogleLogin onSuccess={(id) => storeIdentity(id)} />
-        </LoginRoot>
+const NavBar = () => {
+    return (
+        <NavBarRoot>
+            <Brand>
+                Orkes Labs
+            </Brand>
+            <NavButton component={Link} to="/demo/semantic-search">
+                Semantic Search
+            </NavButton>
+            <NavButton component={Link} to="/demo/approvals">
+                Approvals
+            </NavButton>
+        </NavBarRoot>
     );
+};
+
+export const ConfigContext = createContext({ identity: null, origin: null });
+
+const App = ({ identity }) => {
+    const origin = window.location.hostname === 'localhost' ? 'http://localhost:8080' : '';
+    const config = { identity, origin };
 
     return (
-        <GoogleOAuthProvider clientId={clientId}>
-            { identity ? <NewsIndexSearch identity={identity} /> : <Login /> }
-        </GoogleOAuthProvider>
-    )
+        <BrowserRouter>
+            <ConfigContext.Provider value={config}>
+                <NavBar />
+                <ContentRoot>
+                    <Routes>
+                        <Route path="/demo" element={<Navigate to="semantic-search" />} />
+                        <Route path="/demo/semantic-search" element={<SemanticSearch />} />
+                        <Route path="/demo/approvals" element={<Approvals />} />
+                    </Routes>
+                </ContentRoot>
+            </ConfigContext.Provider>
+        </BrowserRouter>
+    );
 };
+export default App;
