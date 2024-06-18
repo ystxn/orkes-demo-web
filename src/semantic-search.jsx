@@ -4,9 +4,9 @@ import Face2Icon from '@mui/icons-material/Face2';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { IconButton, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import './news-index-search.css';
+import { ConfigContext } from './app';
 
 const Root = styled.div`
   display: flex;
@@ -45,11 +45,11 @@ const Bubble = ({ message, color, icon }) => (
   </BubbleRoot>
 );
 
-const NewsIndexSearch = ({ identity }) => {
+const SemanticSearch = () => {
+  const { identity, origin } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState([]);
   const [ input, setInput ] = useState("List the top 5 companies by their recently reported results");
-  const origin = window.location.hostname === 'localhost' ? 'http://localhost:8080' : '';
 
   const scrollToBottom = () => {
     const messageList = document.querySelector('#message-list');
@@ -104,7 +104,7 @@ const NewsIndexSearch = ({ identity }) => {
     <Root>
       <Stack direction="row" justifyContent="space-between">
         <Typography variant="h5">
-          News Index Search
+          Semantic Search
         </Typography>
         <IconButton color="error" onClick={() => setMessages([ 'Hello there' ])}>
           <DeleteForeverIcon />
@@ -142,4 +142,4 @@ const NewsIndexSearch = ({ identity }) => {
   )
 };
 
-export default NewsIndexSearch;
+export default SemanticSearch;
