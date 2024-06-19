@@ -8,6 +8,7 @@ import ReactDOM from 'react-dom/client';
 import styled from 'styled-components';
 import App from './app';
 import './index.css';
+import { ThemeProvider, createTheme } from '@mui/material';
 
 const LoginRoot = styled.div`
     height: 100%;
@@ -15,6 +16,14 @@ const LoginRoot = styled.div`
     justify-content: center;
     align-items: center;
 `;
+
+const theme = createTheme({
+    palette: {
+        primary: {
+            main: '#6c37bd',
+        },
+    },
+});
 
 const Main = () => {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -41,9 +50,11 @@ const Main = () => {
   );
 
   return (
-      <GoogleOAuthProvider clientId={clientId}>
-          { identity ? <App identity={identity} /> : <Login /> }
-      </GoogleOAuthProvider>
+    <ThemeProvider theme={theme}>
+        <GoogleOAuthProvider clientId={clientId}>
+            { identity ? <App identity={identity} /> : <Login /> }
+        </GoogleOAuthProvider>
+    </ThemeProvider>
   );
 };
 
