@@ -5,12 +5,13 @@ import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
 import styled from 'styled-components';
 import Approvals from './approvals';
 import SemanticSearch from './semantic-search';
+import { useTheme } from '@mui/material/styles';
 
 const NavBarRoot = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #6c37bd;
+    background-color: ${props => props.color};
     padding: .5rem;
 `;
 
@@ -33,10 +34,17 @@ const ContentRoot = styled.div`
     flex: 1 1 1px;
 `;
 
+const BrandImage = styled.img`
+    height: 2.5rem;
+    padding-right: .3rem;
+`;
+
 const NavBar = () => {
+    const theme = useTheme();
     return (
-        <NavBarRoot>
+        <NavBarRoot color={theme.palette.primary.main}>
             <Stack direction="row">
+                <BrandImage src="logo-mark.svg" />
                 <Brand>
                     Orkes Labs
                 </Brand>
