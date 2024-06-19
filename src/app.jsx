@@ -1,13 +1,14 @@
+import { Stack, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-import styled from 'styled-components';
-import { Typography } from '@mui/material';
-import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
-import SemanticSearch from './semantic-search';
-import Approvals from './approvals';
 import { createContext } from 'react';
+import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
+import styled from 'styled-components';
+import Approvals from './approvals';
+import SemanticSearch from './semantic-search';
 
 const NavBarRoot = styled.div`
     display: flex;
+    justify-content: space-between;
     align-items: center;
     background-color: #6c37bd;
     padding: .5rem;
@@ -17,6 +18,7 @@ const Brand = styled(Typography)`
     text-transform: uppercase;
     color: white;
     padding-right: 1.5rem;
+    align-self: center;
 `;
 
 const NavButton = styled(Button)`
@@ -34,14 +36,24 @@ const ContentRoot = styled.div`
 const NavBar = () => {
     return (
         <NavBarRoot>
-            <Brand>
-                Orkes Labs
-            </Brand>
-            <NavButton component={Link} to="/demo/semantic-search">
-                Semantic Search
-            </NavButton>
-            <NavButton component={Link} to="/demo/approvals">
-                Approvals
+            <Stack direction="row">
+                <Brand>
+                    Orkes Labs
+                </Brand>
+                <NavButton component={Link} to="/demo/semantic-search">
+                    Semantic Search
+                </NavButton>
+                <NavButton component={Link} to="/demo/approvals">
+                    Approvals
+                </NavButton>
+            </Stack>
+            <NavButton
+                component={Link}
+                to="https://ys.orkesconductor.io"
+                target="_blank"
+                sx={{ justifySelf: 'flex-end' }}
+            >
+                Launch Cluster
             </NavButton>
         </NavBarRoot>
     );
