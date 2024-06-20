@@ -22,9 +22,20 @@ const Brand = styled(Typography)`
     align-self: center;
 `;
 
-const NavButton = styled(Button)`
-    color: white !important;
-    display: block;
+const NavItem = styled.div`
+    color: white;
+    display: flex;
+    align-items: center;
+    a {
+        color: white !important;
+        line-height: 1rem;
+    }
+    &:not(:last-child)::after {
+        margin: .3rem;
+        content: '·';
+        font-size: 2rem;
+        line-height: .1rem;
+    }
 `;
 
 const ContentRoot = styled.div`
@@ -49,21 +60,26 @@ const NavBar = () => {
                 <Brand>
                     Orkes Labs
                 </Brand>
-                <NavButton component={Link} to="/demo/semantic-search">
-                    Semantic Search
-                </NavButton>
-                <NavButton component={Link} to="/demo/approvals">
-                    Approvals
-                </NavButton>
+                <NavItem>
+                    <Button component={Link} to="/demo/semantic-search">
+                        Semantic Search
+                    </Button>
+                </NavItem>
+                <NavItem>
+                    <Button component={Link} to="/demo/approvals">
+                        Approvals
+                    </Button>
+                </NavItem>
             </Stack>
-            <NavButton
-                component={Link}
-                to="https://ys.orkesconductor.io"
-                target="_blank"
-                sx={{ justifySelf: 'flex-end' }}
-            >
-                Launch Cluster
-            </NavButton>
+            <NavItem style={{ justifySelf: 'flex-end' }}>
+                <Button
+                    component={Link}
+                    to="https://ys.orkesconductor.io"
+                    target="_blank"
+                >
+                    Launch Cluster
+                </Button>
+            </NavItem>
         </NavBarRoot>
     );
 };

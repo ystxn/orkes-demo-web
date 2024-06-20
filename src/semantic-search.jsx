@@ -19,6 +19,8 @@ const MessageStack = styled(Stack)`
   overflow-y: auto;
   flex: 1 1 1px;
   gap: .8em;
+  padding-right: .5rem;
+  padding-bottom: .5rem;
 `
 
 const BubbleRoot = styled.div`
@@ -32,7 +34,6 @@ const BubbleRoot = styled.div`
   align-self: flex-start;
   align-items: center;
   padding: .5rem;
-  margin-right: .7rem;
   font-family: Roboto, Helvetica, Arial, sans-serif;
   font-size: .9rem;
   white-space: pre;
@@ -49,7 +50,7 @@ const SemanticSearch = () => {
   const { identity, origin } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState([]);
-  const [ input, setInput ] = useState("List the top 5 companies by their recently reported results");
+  const [ input, setInput ] = useState('List the top 5 companies by their recently reported results');
 
   const scrollToBottom = () => {
     const messageList = document.querySelector('#message-list');
@@ -88,11 +89,13 @@ const SemanticSearch = () => {
         if (response.ok) {
           return response.json();
         } else {
-          console.log('not ok')
           throw new Error(JSON.stringify(response));
         }
       })
-      .then((response) => addMessage(response.result))
+      .then((response) => {
+        addMessage(response.result);
+        setInput('');
+      })
       .catch((error) => {
         console.log(error)
         setMessages((old) => [ ...old, 'Error: ' + error ]);
@@ -129,6 +132,7 @@ const SemanticSearch = () => {
           disabled={loading}
           value={input}
           onChange={(event) => setInput(event.target.value)}
+          onKeyDown={({ key }) => (key === 'Enter') && fireQuery()}
         />
         <LoadingButton
           variant="contained"

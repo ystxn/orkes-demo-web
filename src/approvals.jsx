@@ -1,13 +1,13 @@
 import CloseIcon from '@mui/icons-material/Close';
-import LoadingButton from "@mui/lab/LoadingButton";
-import { FormControlLabel, IconButton, Snackbar, Switch } from "@mui/material";
-import CircularProgress from "@mui/material/CircularProgress";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Button, Chip, FormControlLabel, IconButton, Paper, Snackbar, Stack, Switch } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
-import React, { useContext, useEffect, useState, useMemo } from "react";
-import styled from "styled-components";
-import { ConfigContext } from "./app";
+import { useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { ConfigContext } from './app';
 
 const Root = styled.div`
   display: flex;
@@ -29,6 +29,13 @@ const Pane = styled.div`
     &:last-child { width: 40vw }
 `;
 
+const FormWrapper = styled.div`
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+`;
+
 const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
@@ -39,25 +46,25 @@ const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
 });
 const formatDate = (epoch) => (dateTimeFormat.format(new Date(epoch)));
 
-const TasksPane = ({ loading, humanTasks, loadDetails }) => (
-    <>
-        { (loading && humanTasks.length === 0) ? <CircularProgress /> : humanTasks.map((task) => (
-            <div key={task.taskId}>
-                <Typography>
-                    {formatDate(task.createdOn)}: {task.displayName}
-                </Typography>
-                <LoadingButton
-                    variant="contained"
-                    onClick={() => loadDetails(task)}
-                    loading={loading}
-                >
-                    Open Task
-                </LoadingButton>
-            </div>
-        ))}
-        { (!loading && humanTasks.length === 0) && <Typography>No pending human tasks</Typography> }
-    </>
-);
+const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId }) => {
+    if (humanTasks.length === 0) {
+        return loading ? <CircularProgress /> : <Typography>No pending human tasks</Typography>;
+    }
+    return humanTasks.map((task) => (
+        <Stack direction="row" gap={1} key={task.taskId}>
+            <Chip color={currentTaskId === task.taskId ? 'secondary' : undefined} label={formatDate(task.createdOn)} />
+            <LoadingButton
+                variant="contained"
+                onClick={() => loadDetails(task)}
+                loading={loading}
+                disabled={disabled || currentTaskId === task.taskId}
+            >
+                Open Task
+            </LoadingButton>
+            <Chip color={currentTaskId === task.taskId ? 'info' : undefined}  label={task.displayName} />
+        </Stack>
+    ));
+};
 
 const TaskFields = ({ templateDef, originals, setResult }) => {
     const [ innerOutputs, setInnerOutputs ] = useState(originals);
@@ -70,7 +77,11 @@ const TaskFields = ({ templateDef, originals, setResult }) => {
         const dataType = templateDef.jsonSchema.properties[fieldName].type;
         const readonly = !!field.options?.readonly;
 
-        return dataType === 'string' ? (
+        return dataType === 'string' ? readonly ? (
+            <Typography key={field.label}>
+                <b>{field.label}</b>: {innerOutputs[fieldName]}
+            </Typography>
+        ) : (
             <TextField
                 key={field.label}
                 label={field.label}
@@ -78,7 +89,7 @@ const TaskFields = ({ templateDef, originals, setResult }) => {
                 value={innerOutputs[fieldName]}
                 onChange={({ target }) => setInnerOutputs((old) => ({ ...old, [target.name]: target.value }))}
                 InputProps={{ readOnly: readonly }}
-                disabled={readonly}
+
             />
         ) : (
             <FormControlLabel
@@ -125,7 +136,7 @@ const Approvals = () => {
     const { identity, origin } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(true);
     const [ humanTasks, setHumanTasks ] = useState([]);
-    const [ task, setTask ] = useState({});
+    const [ task, setTask ] = useState();
     const [ templateDef, setTemplateDef ] = useState();
     const [ snackbarOpen, setSnackbarOpen ] = useState(false);
     const [ outputs, setOutputs ] = useState({});
@@ -208,10 +219,16 @@ const Approvals = () => {
             .then(() => {
                 setSnackbarOpen(true);
                 setTemplateDef(undefined);
+                setTask(undefined);
                 listHumanTasks();
             })
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
+    };
+
+    const reset = () => {
+        setTemplateDef(undefined);
+        setTask(undefined);
     };
 
     return (
@@ -221,17 +238,36 @@ const Approvals = () => {
             </Typography>
             <SplitPane>
                 <Pane>
-                    <TasksPane loading={loading} humanTasks={humanTasks} loadDetails={loadDetails} />
+                    <TasksPane
+                        loading={loading && !templateDef}
+                        disabled={loading && templateDef}
+                        humanTasks={humanTasks}
+                        loadDetails={loadDetails}
+                        currentTaskId={task?.taskId}
+                    />
                 </Pane>
                 <form onSubmit={claimAndComplete}>
                     <Pane>
                         { (loading && humanTasks.length > 0 && !templateDef) && <CircularProgress /> }
-                        { !loading && templateDef && (
+                        { templateDef && (
                             <>
-                                <TaskFields templateDef={templateDef} originals={outputs} setResult={setOutputs} />
-                                <LoadingButton variant="contained" type="submit" loading={loading}>
-                                    Claim and Complete
-                                </LoadingButton>
+                                <Stack direction="row" gap={1}>
+                                    <Chip label={task.displayName} color="info" />
+                                    <Chip label={task.taskId} />
+                                </Stack>
+                                <Paper elevation={2}>
+                                    <FormWrapper>
+                                        <TaskFields templateDef={templateDef} originals={outputs} setResult={setOutputs} />
+                                        <Stack direction="row" gap={1}>
+                                            <LoadingButton color="success" variant="contained" type="submit" loading={loading}>
+                                                Claim and Complete
+                                            </LoadingButton>
+                                            <Button variant="contained" color="inherit" onClick={reset}>
+                                                Cancel
+                                            </Button>
+                                        </Stack>
+                                    </FormWrapper>
+                                </Paper>
                             </>
                         )}
                     </Pane>
