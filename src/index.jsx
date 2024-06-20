@@ -19,9 +19,8 @@ const LoginRoot = styled.div`
 
 const theme = createTheme({
     palette: {
-        primary: {
-            main: '#6c37bd',
-        },
+        primary: { main: '#6c37bd' },
+        secondary: { main: '#ffc200' },
     },
 });
 
@@ -58,4 +57,8 @@ const Main = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById('root')).render(<Main />);
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <StrictMode>
+        <Main />
+    </StrictMode>
+);

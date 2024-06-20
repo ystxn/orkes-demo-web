@@ -20,11 +20,33 @@ const Brand = styled(Typography)`
     color: white;
     padding-right: 1.5rem;
     align-self: center;
+    white-space: nowrap;
+    @media screen and (max-width: 600px) {
+        display: none
+    }
 `;
 
-const NavButton = styled(Button)`
-    color: white !important;
-    display: block;
+const NavItem = styled.div`
+    color: white;
+    display: flex;
+    align-items: center;
+    a {
+        color: white !important;
+        line-height: 1rem;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    &:not(:last-child)::after {
+        margin: .3rem;
+        content: '·';
+        font-size: 2rem;
+        line-height: .1rem;
+    }
+    &.cluster {
+        @media screen and (max-width: 600px) {
+            display: none
+        }
+    }
 `;
 
 const ContentRoot = styled.div`
@@ -49,21 +71,26 @@ const NavBar = () => {
                 <Brand>
                     Orkes Labs
                 </Brand>
-                <NavButton component={Link} to="/demo/semantic-search">
-                    Semantic Search
-                </NavButton>
-                <NavButton component={Link} to="/demo/approvals">
-                    Approvals
-                </NavButton>
+                <NavItem>
+                    <Button component={Link} to="/demo/semantic-search">
+                        Semantic Search
+                    </Button>
+                </NavItem>
+                <NavItem>
+                    <Button component={Link} to="/demo/approvals">
+                        Approvals
+                    </Button>
+                </NavItem>
             </Stack>
-            <NavButton
-                component={Link}
-                to="https://ys.orkesconductor.io"
-                target="_blank"
-                sx={{ justifySelf: 'flex-end' }}
-            >
-                Launch Cluster
-            </NavButton>
+            <NavItem className="cluster">
+                <Button
+                    component={Link}
+                    to="https://ys.orkesconductor.io"
+                    target="_blank"
+                >
+                    Launch Cluster
+                </Button>
+            </NavItem>
         </NavBarRoot>
     );
 };
