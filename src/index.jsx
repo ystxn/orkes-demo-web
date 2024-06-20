@@ -58,8 +58,4 @@ const Main = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Main />
-  </StrictMode>,
-);
+ReactDOM.createRoot(document.getElementById('root')).render(<Main />);
