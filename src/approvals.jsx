@@ -65,7 +65,7 @@ const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId }
     }
     return humanTasks.map((task) => (
         <TasksPaneItem key={task.taskId}>
-            <Chip color={currentTaskId === task.taskId ? 'secondary' : undefined} label={formatDate(task.createdOn)} />
+            <Chip color={currentTaskId === task.taskId ? 'secondary' : undefined} label={formatDate(task.createTime)} />
             <LoadingButton
                 variant="contained"
                 onClick={() => loadDetails(task)}
