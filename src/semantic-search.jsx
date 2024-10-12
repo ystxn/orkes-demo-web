@@ -84,7 +84,7 @@ const SemanticSearch = () => {
       },
       body: JSON.stringify({ query: input }),
     };
-    fetch(`${origin}/demo/api/execute/news-context-search/1`, config)
+    fetch(`${origin}/demo/api/execute/books-search/1`, config)
       .then((response) => {
         if (response.ok) {
           return response.json();
