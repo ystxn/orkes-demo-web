@@ -50,7 +50,7 @@ const SemanticSearch = () => {
   const { identity, origin } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState([]);
-  const [ input, setInput ] = useState('List the top 5 companies by their recently reported results');
+  const [ input, setInput ] = useState('Why did dorothy not realize the wizard was fake?');
 
   const scrollToBottom = () => {
     const messageList = document.querySelector('#message-list');
@@ -84,7 +84,7 @@ const SemanticSearch = () => {
       },
       body: JSON.stringify({ query: input }),
     };
-    fetch(`${origin}/demo/api/execute/news-context-search/1`, config)
+    fetch(`${origin}/demo/api/execute/books-search/1`, config)
       .then((response) => {
         if (response.ok) {
           return response.json();
