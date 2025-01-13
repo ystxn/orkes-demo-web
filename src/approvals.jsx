@@ -59,9 +59,41 @@ const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
 });
 const formatDate = (epoch) => (dateTimeFormat.format(new Date(epoch)));
 
-const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId }) => {
+const TasksPaneEmptyState = ({ fetchConfig, listHumanTasks }) => {
+    const [ loading, setLoading ] = useState(false);
+    const launchExpensesWorkflow = () => {
+        setLoading(true);
+        fetch(`${fetchConfig.origin}/demo/api/start/expense-approvals/1`, { ...fetchConfig, method: 'post', body: '{}' })
+            .then((response) => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    console.error('not ok')
+                    throw new Error(JSON.stringify(response));
+                }
+            })
+            .then(listHumanTasks)
+            .catch((error) => console.error(error))
+            .finally(() => setLoading(false));
+    };
+    return (
+        <>
+            <Typography>No pending human tasks</Typography>
+            <LoadingButton
+                variant="contained"
+                color="secondary"
+                onClick={launchExpensesWorkflow}
+                loading={loading}
+            >
+                Launch Expenses Workflow
+            </LoadingButton>
+        </>
+    );
+}
+
+const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId, fetchConfig, listHumanTasks }) => {
     if (humanTasks.length === 0) {
-        return loading ? <CircularProgress /> : <Typography>No pending human tasks</Typography>;
+        return loading ? <CircularProgress /> : <TasksPaneEmptyState fetchConfig={fetchConfig} listHumanTasks={listHumanTasks} />;
     }
     return humanTasks.map((task) => (
         <TasksPaneItem key={task.taskId}>
@@ -156,6 +188,7 @@ const Approvals = () => {
     const theme = useTheme();
 
     const fetchConfig = {
+        origin,
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -164,6 +197,7 @@ const Approvals = () => {
     };
 
     const listHumanTasks = () => {
+        setLoading(true);
         fetch(`${origin}/demo/api/human-tasks`, fetchConfig)
             .then((response) => {
                 if (response.ok) {
@@ -220,6 +254,9 @@ const Approvals = () => {
             method: 'post',
             body: JSON.stringify(outputs),
         };
+        if (!task) {
+            return;
+        }
         fetch(`${origin}/demo/api/human-tasks/${task.taskId}`, postConfig)
             .then((response) => {
                 if (response.ok) {
@@ -257,12 +294,14 @@ const Approvals = () => {
                         humanTasks={humanTasks}
                         loadDetails={loadDetails}
                         currentTaskId={task?.taskId}
+                        fetchConfig={fetchConfig}
+                        listHumanTasks={listHumanTasks}
                     />
                 </Pane>
                 <form onSubmit={claimAndComplete}>
                     <Pane>
                         { (loading && humanTasks.length > 0 && !templateDef) && <CircularProgress /> }
-                        { templateDef && (
+                        { (templateDef && task) && (
                             <>
                                 <Paper elevation={5}>
                                     <FormWrapper>

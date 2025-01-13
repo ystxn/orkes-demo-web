@@ -3,7 +3,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
-import { StrictMode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import styled from 'styled-components';
 import App from './app';
@@ -57,8 +57,4 @@ const Main = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-    <StrictMode>
-        <Main />
-    </StrictMode>
-);
+ReactDOM.createRoot(document.getElementById('root')).render(<Main />);
