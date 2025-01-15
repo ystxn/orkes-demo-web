@@ -47,7 +47,7 @@ const Bubble = ({ message, color, icon }) => (
 );
 
 const SemanticSearch = () => {
-  const { identity, origin } = useContext(ConfigContext);
+  const { callApi } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState([]);
   const [ input, setInput ] = useState('Why did dorothy not realize the wizard was fake?');
@@ -72,35 +72,14 @@ const SemanticSearch = () => {
   const addMessage = (newMessage) => setMessages((old) => [ ...old, newMessage ]);
 
   const fireQuery = () => {
-    setLoading(true);
     addMessage(input);
 
-    const config = {
-      method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${identity}`,
-      },
-      body: JSON.stringify({ query: input }),
+    const onSuccess = (response) => {
+      addMessage(response.result);
+      setInput('');
     };
-    fetch(`${origin}/demo/api/execute/books-search/1`, config)
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error(JSON.stringify(response));
-        }
-      })
-      .then((response) => {
-        addMessage(response.result);
-        setInput('');
-      })
-      .catch((error) => {
-        console.log(error)
-        setMessages((old) => [ ...old, 'Error: ' + error ]);
-      })
-      .finally(() => setLoading(false));
+    const onError = (error) => setMessages((old) => [ ...old, 'Error: ' + error ]);
+    callApi('post', 'execute/books-search/1', { query: input }, onSuccess, onError, setLoading);
   };
 
   return (

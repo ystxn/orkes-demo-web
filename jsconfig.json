@@ -2,6 +2,9 @@
     "compilerOptions": {
         "baseUrl": "./src",
         "checkJs": true,
-        "jsx": "react-jsx"
+        "jsx": "react-jsx",
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "node",
     }
 }

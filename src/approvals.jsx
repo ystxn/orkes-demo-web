@@ -59,23 +59,12 @@ const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
 });
 const formatDate = (epoch) => (dateTimeFormat.format(new Date(epoch)));
 
-const TasksPaneEmptyState = ({ fetchConfig, listHumanTasks }) => {
+const TasksPaneEmptyState = ({ listHumanTasks }) => {
+    const { callApi } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(false);
-    const launchExpensesWorkflow = () => {
-        setLoading(true);
-        fetch(`${fetchConfig.origin}/demo/api/start/expense-approvals/1`, { ...fetchConfig, method: 'post', body: '{}' })
-            .then((response) => {
-                if (response.ok) {
-                    return response.text();
-                } else {
-                    console.error('not ok')
-                    throw new Error(JSON.stringify(response));
-                }
-            })
-            .then(listHumanTasks)
-            .catch((error) => console.error(error))
-            .finally(() => setLoading(false));
-    };
+    const launchExpensesWorkflow = () =>
+        callApi('post', 'start/expense-approvals/1', null, listHumanTasks, null, setLoading);
+
     return (
         <>
             <Typography>No pending human tasks</Typography>
@@ -91,9 +80,9 @@ const TasksPaneEmptyState = ({ fetchConfig, listHumanTasks }) => {
     );
 }
 
-const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId, fetchConfig, listHumanTasks }) => {
+const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId, listHumanTasks }) => {
     if (humanTasks.length === 0) {
-        return loading ? <CircularProgress /> : <TasksPaneEmptyState fetchConfig={fetchConfig} listHumanTasks={listHumanTasks} />;
+        return loading ? <CircularProgress /> : <TasksPaneEmptyState listHumanTasks={listHumanTasks} />;
     }
     return humanTasks.map((task) => (
         <TasksPaneItem key={task.taskId}>
@@ -178,7 +167,7 @@ const Toast = ({ theme, snackbarOpen, setSnackbarOpen }) => (
 );
 
 const Approvals = () => {
-    const { identity, origin } = useContext(ConfigContext);
+    const { callApi } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(true);
     const [ humanTasks, setHumanTasks ] = useState([]);
     const [ task, setTask ] = useState();
@@ -187,36 +176,13 @@ const Approvals = () => {
     const [ outputs, setOutputs ] = useState({});
     const theme = useTheme();
 
-    const fetchConfig = {
-        origin,
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${identity}`,
-        },
-    };
-
-    const listHumanTasks = () => {
-        setLoading(true);
-        fetch(`${origin}/demo/api/human-tasks`, fetchConfig)
-            .then((response) => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    console.error('not ok')
-                    throw new Error(JSON.stringify(response));
-                }
-            })
-            .then((response) => setHumanTasks(response.results))
-            .catch((error) => console.error(error))
-            .finally(() => setLoading(false));
-    };
+    const listHumanTasks = () =>
+        callApi('get', 'human-tasks', null, ({ results }) => setHumanTasks(results), null, setLoading);
 
     useEffect(listHumanTasks, []);
 
     const loadDetails = (t) => {
         setTemplateDef(undefined);
-        setLoading(true);
         setTask(t);
 
         const {
@@ -227,53 +193,23 @@ const Approvals = () => {
         } = t.input;
         setOutputs(originals);
 
-        const template = t.input.__humanTaskDefinition.userFormTemplate;
-        const templateName = template.name;
-        const templateVersion = template.version;
-
-        fetch(`${origin}/demo/api/human-template?name=${templateName}`, fetchConfig)
-            .then((response) => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    console.error('not ok')
-                    throw new Error(JSON.stringify(response));
-                }
-            })
-            .then((response) => setTemplateDef(response.filter((r) => r.version === templateVersion)[0]))
-            .catch((error) => console.error(error))
-            .finally(() => setLoading(false));
+        const { name, version } = t.input.__humanTaskDefinition.userFormTemplate;
+        const onSuccess = (response) => setTemplateDef(response.filter((r) => r.version === version)[0]);
+        callApi('get', `human-template?name=${name}`, null, onSuccess, null, setLoading);
     };
 
     const claimAndComplete = (event) => {
         event.preventDefault();
-        setLoading(true);
-
-        const postConfig = {
-            ...fetchConfig,
-            method: 'post',
-            body: JSON.stringify(outputs),
-        };
         if (!task) {
             return;
         }
-        fetch(`${origin}/demo/api/human-tasks/${task.taskId}`, postConfig)
-            .then((response) => {
-                if (response.ok) {
-                    return true;
-                } else {
-                    console.error('not ok')
-                    throw new Error(JSON.stringify(response));
-                }
-            })
-            .then(() => {
-                setSnackbarOpen(true);
-                setTemplateDef(undefined);
-                setTask(undefined);
-                listHumanTasks();
-            })
-            .catch((error) => console.error(error))
-            .finally(() => setLoading(false));
+        const onSuccess = () => {
+            setSnackbarOpen(true);
+            setTemplateDef(undefined);
+            setTask(undefined);
+            listHumanTasks();
+        };
+        callApi('post', `human-tasks/${task.taskId}`, outputs, onSuccess, null, setLoading);
     };
 
     const reset = () => {
@@ -283,8 +219,8 @@ const Approvals = () => {
 
     return (
         <Root>
-            <Typography variant="h5">
-                Approvals
+            <Typography variant="h5" mb={2}>
+                Expense Approvals
             </Typography>
             <SplitPane>
                 <Pane>
@@ -294,7 +230,6 @@ const Approvals = () => {
                         humanTasks={humanTasks}
                         loadDetails={loadDetails}
                         currentTaskId={task?.taskId}
-                        fetchConfig={fetchConfig}
                         listHumanTasks={listHumanTasks}
                     />
                 </Pane>
