@@ -11,8 +11,16 @@ const Root = styled.form`
     gap: .7rem;
     align-items: flex-start;
 
-    .MuiAlert-root { margin-bottom: 1.5rem; }
+    .MuiAlert-root + .MuiTextField-root { margin-top: 1.5rem; }
     .MuiTextField-root { width: 25rem }
+`;
+
+const FlexAlert = styled(Alert)`
+    .MuiAlert-message {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
 `;
 
 const rootWorkflow = 'onboarding-wizard';
@@ -23,13 +31,24 @@ const Onboarding = () => {
     const [ stage, setStage ] = useState(1);
     const [ schema, setSchema ] = useState({});
     const [ currentExecutionId, setCurrentExecutionId ] = useState('');
-    const [ isCompleted, setIsCompleted ] = useState(false);
+    const [ completedPayload, setCompletedPayload ] = useState(null);
+    const [ error, setError ] = useState('');
 
     const loadInProgressTask = (execution) => {
         setCurrentExecutionId(execution.workflowId);
-        const inProgressTask = execution.tasks.find((task) => task.status === 'IN_PROGRESS');
-        setStage(parseInt(inProgressTask.referenceTaskName.substr(-1)));
-        const nextSchemaName = inProgressTask.taskDefinition.inputSchema.name;
+        const inProgressYield = execution.tasks.find((task) => task.status === 'IN_PROGRESS' && task.taskType === 'YIELD');
+        const currentStage = inProgressYield.inputData.stage;
+        setStage(currentStage);
+
+        if (!inProgressYield.inputData.isValidated) {
+            const reason = inProgressYield.inputData.message;
+            setError(reason);
+            if (currentStage === 1) {
+                callApi('delete', `terminate/${execution.workflowId}?reason=${reason}`, null, () => setLoading(false));
+                return;
+            }
+        }
+        const nextSchemaName = inProgressYield.taskDefinition.inputSchema.name;
         callApi('get', `schema/${nextSchemaName}`, null, ({ data }) => {
             setSchema(data.properties);
             setLoading(false);
@@ -58,21 +77,20 @@ const Onboarding = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        setError('');
         const formData = new FormData(event.target);
         const data = Object.fromEntries(formData.entries());
 
         setLoading(true);
         if (stage === 1) {
             data.correlationId = data.email;
-            callApi('post', `start/${rootWorkflow}/1`, data, (executionId) => {
-                callApi('post', `signal/${executionId}`, null, (execution) => loadInProgressTask(execution));
-            });
+            callApi('post', `execute/${rootWorkflow}/1`, data, (execution) => loadInProgressTask(execution));
         } else {
             callApi('post', `signal/${currentExecutionId}`, data, (execution) => {
                 if (execution.status !== 'COMPLETED') {
                     loadInProgressTask(execution);
                 } else {
-                    setIsCompleted(true);
+                    setCompletedPayload(execution.output.result);
                     setLoading(false);
                 }
             });
@@ -84,19 +102,38 @@ const Onboarding = () => {
         .replace(/^./, (str) => str.toUpperCase());
 
     const Completed = () => (
-        <Alert severity="success">
+        <FlexAlert severity="success">
             Onboarding completed!
-        </Alert>
+            { Object.keys(completedPayload).map((key) => (
+                <TextField
+                    key={key}
+                    label={transformLabel(key)}
+                    name={key}
+                    value={completedPayload[key]}
+                />
+            )) }
+        </FlexAlert>
     );
 
-    const Main = () => loading ? <CircularProgress /> : isCompleted ? <Completed /> : (
+    const Main = () => loading ? <CircularProgress /> : completedPayload ? <Completed /> : (
         <>
             <Alert severity="info">
                 Stage {stage}:
                 {' '}
-                { stage === 1 && 'No existing workflow executions found. This submission will start an execution and signal the first yield.' }
+                { stage === 1 && 'No existing workflow executions found. This submission will start an execution with email as correlation ID.' }
                 { stage > 1 && (<><Link target="_blank" to={`https://ys.orkesconductor.io/execution/${currentExecutionId}`}>Execution</Link> in progress. This submission will submit the data as a signal to the current yield task.</>) }
             </Alert>
+            { (stage < 3) && (
+                <Alert severity="warning">
+                    { stage === 1 && 'If First Name is john, validation will fail' }
+                    { stage === 2 && 'If Employees is 10 and below, validation will fail' }
+                </Alert>
+            )}
+            { error && (
+                <Alert severity="error">
+                    { error }
+                </Alert>
+            )}
             { Object.keys(schema).map((key) => (
                 <TextField
                     key={key}
