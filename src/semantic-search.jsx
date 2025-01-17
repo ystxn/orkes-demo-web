@@ -79,7 +79,7 @@ const SemanticSearch = () => {
       setInput('');
     };
     const onError = (error) => setMessages((old) => [ ...old, 'Error: ' + error ]);
-    callApi('post', 'execute/books-search/1', { query: input }, onSuccess, onError, setLoading);
+    callApi('post', 'execute/books-search', { query: input }, onSuccess, onError, setLoading);
   };
 
   return (
