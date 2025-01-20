@@ -5,6 +5,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { IconButton, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ConfigContext } from './app';
 
@@ -13,6 +14,7 @@ const Root = styled.div`
   flex-direction: column;
   flex: 1 1 1px;
   gap: 1rem;
+  a,a:visited,a:active { color: inherit}
 `;
 
 const MessageStack = styled(Stack)`
@@ -36,20 +38,22 @@ const BubbleRoot = styled.div`
   padding: .5rem;
   font-family: Roboto, Helvetica, Arial, sans-serif;
   font-size: .9rem;
-  white-space: pre;
-  text-wrap: wrap;
+  white-space: break-spaces;
 `;
 
-const Bubble = ({ message, color, icon }) => (
+const Bubble = ({ message, executionId, color, icon }) => (
   <BubbleRoot color={color}>
-    { icon } { message }
+    { executionId ? <Link target="_blank" to={`https://ys.orkesconductor.io/execution/${executionId}`}>{icon}</Link> : icon }
+    { message }
   </BubbleRoot>
 );
+
+const defaultMessages = [{ result: 'Hello there' }];
 
 const SemanticSearch = () => {
   const { callApi } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
-  const [ messages, setMessages ] = useState([]);
+  const [ messages, setMessages ] = useState(defaultMessages);
   const [ input, setInput ] = useState('Why did dorothy not realize the wizard was fake?');
 
   const scrollToBottom = () => {
@@ -59,26 +63,31 @@ const SemanticSearch = () => {
 
   useEffect(() => {
     const storedMessages = window.localStorage.getItem('messages');
-    setMessages(storedMessages ? JSON.parse(storedMessages) : [ 'Hello there' ]);
+    if (storedMessages) {
+      const parsed = JSON.parse(storedMessages);
+      const valid = typeof parsed[0] === 'object';
+      setMessages(valid ? parsed : defaultMessages);
+    }
   }, []);
 
   useEffect(() => {
-    if (messages?.length > 0) {
+    if (messages?.length > 1) {
       setTimeout(scrollToBottom, 50);
       window.localStorage.setItem('messages', JSON.stringify(messages));
     }
   } , [ messages ]);
 
-  const addMessage = (newMessage) => setMessages((old) => [ ...old, newMessage ]);
-
   const fireQuery = () => {
-    addMessage(input);
+    setMessages((old) => [ ...old, { result: input } ]);
 
     const onSuccess = (response) => {
-      addMessage(response.result);
+      setMessages((old) => [
+        ...old.map((message, index) => (index < old.length - 1) ? message : { ...message, executionId: response.executionId }),
+        response
+      ]);
       setInput('');
     };
-    const onError = (error) => setMessages((old) => [ ...old, 'Error: ' + error ]);
+    const onError = (error) => setMessages((old) => [ ...old, { result: 'Error: ' + error } ]);
     callApi('post', 'execute/books-search', { query: input }, onSuccess, onError, setLoading);
   };
 
@@ -88,7 +97,7 @@ const SemanticSearch = () => {
         <Typography variant="h5">
           Semantic Search
         </Typography>
-        <IconButton color="error" onClick={() => setMessages([ 'Hello there' ])}>
+        <IconButton color="error" onClick={() => setMessages(defaultMessages)}>
           <DeleteForeverIcon />
         </IconButton>
       </Stack>
@@ -96,7 +105,8 @@ const SemanticSearch = () => {
           { messages.map((message, index) => (
             <Bubble
               key={index}
-              message={message}
+              message={message.result}
+              executionId={message.executionId}
               color={index % 2 === 0 ? 'rgb(25, 118, 210)' : 'rgb(156, 39, 176)'}
               icon={index % 2 === 0 ? <FaceIcon /> : <Face2Icon />}
             />
