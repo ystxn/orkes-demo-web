@@ -54,7 +54,7 @@ const SemanticSearch = () => {
   const { callApi } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState(defaultMessages);
-  const [ input, setInput ] = useState('Why did dorothy not realize the wizard was fake?');
+  const [ input, setInput ] = useState('How long will expired account data will be retained for?');
 
   const scrollToBottom = () => {
     const messageList = document.querySelector('#message-list');
@@ -88,7 +88,7 @@ const SemanticSearch = () => {
       setInput('');
     };
     const onError = (error) => setMessages((old) => [ ...old, { result: 'Error: ' + error } ]);
-    callApi('post', 'execute/books-search', { query: input }, onSuccess, onError, setLoading);
+    callApi('post', 'execute/policy-search', { query: input }, onSuccess, onError, setLoading);
   };
 
   return (
