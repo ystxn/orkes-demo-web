@@ -74,6 +74,10 @@ const SemanticSearch = () => {
     if (messages?.length > 1) {
       setTimeout(scrollToBottom, 50);
       window.localStorage.setItem('messages', JSON.stringify(messages));
+    } else {
+      if (window.localStorage.getItem('messages')) {
+        window.localStorage.removeItem('messages');
+      }
     }
   } , [ messages ]);
 
@@ -97,7 +101,11 @@ const SemanticSearch = () => {
         <Typography variant="h5">
           Semantic Search
         </Typography>
-        <IconButton color="error" onClick={() => setMessages(defaultMessages)}>
+        <IconButton
+          color="error"
+          onClick={() => setMessages(defaultMessages)}
+          disabled={messages.length === 1}
+        >
           <DeleteForeverIcon />
         </IconButton>
       </Stack>
