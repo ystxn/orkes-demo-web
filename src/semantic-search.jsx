@@ -85,14 +85,16 @@ const SemanticSearch = () => {
     setMessages((old) => [ ...old, { result: input } ]);
 
     const onSuccess = (response) => {
+      const executionId = response.workflowId;
+      const { result } = response.output;
       setMessages((old) => [
-        ...old.map((message, index) => (index < old.length - 1) ? message : { ...message, executionId: response.executionId }),
-        response
+        ...old.map((message, index) => (index < old.length - 1) ? message : { ...message, executionId }),
+        { result, executionId }
       ]);
       setInput('');
     };
     const onError = (error) => setMessages((old) => [ ...old, { result: 'Error: ' + error } ]);
-    callApi('post', 'execute/policy-search', { query: input }, onSuccess, onError, setLoading);
+    callApi('post', 'execute/policy-search/2', { query: input }, onSuccess, onError, setLoading);
   };
 
   return (

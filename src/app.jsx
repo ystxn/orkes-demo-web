@@ -135,13 +135,12 @@ const App = ({ identity }) => {
                 }
             })
             .then((response) => {
-                console.debug('response', response)
                 if (onSuccess) {
                     onSuccess(response);
                 }
             })
             .catch((error) => {
-                console.log(error);
+                console.error(error);
                 if (onError) {
                     onError(error);
                 }

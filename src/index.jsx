@@ -29,7 +29,6 @@ const Main = () => {
   const [ identity, setIdentity ] = useState('');
 
   const storeIdentity = ({ credential }) => {
-      console.debug('Setting identity', credential);
       window.localStorage.setItem('identity', credential);
       setIdentity(credential);
   };
@@ -37,7 +36,6 @@ const Main = () => {
   useEffect(() => {
       const storedIdentity = window.localStorage.getItem('identity');
       if (storedIdentity) {
-          console.debug('Restoring identity', storedIdentity);
           setIdentity(storedIdentity);
       }
   }, []);
