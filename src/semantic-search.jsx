@@ -11,7 +11,7 @@ import { ConfigContext } from './app';
 import { FlexBox } from './shared';
 
 const Root = styled(FlexBox)`
-  a,a:visited,a:active { color: inherit}
+  a,a:visited,a:active { color: inherit }
 `;
 
 const MessageStack = styled(Stack)`

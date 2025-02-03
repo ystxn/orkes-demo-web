@@ -7,6 +7,7 @@ import { FlexBox } from './shared';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import styled from 'styled-components';
+import { Alert } from '@mui/material';
 
 const ItemRow = styled(FlexBox)`
     flex-direction: row;
@@ -20,6 +21,9 @@ const InvoiceClaims = () => {
     const { callApi } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(false);
     const [ invoice, setInvoice ] = useState(null);
+    const [ error, setError ] = useState(null);
+
+    const onError = () => setError('Your invoice could not be processed');
 
     const handleChange = async (files) => {
         if (files.length === 0) {
@@ -27,7 +31,7 @@ const InvoiceClaims = () => {
         }
         const formData = new FormData();
         formData.append('file', files[0]);
-        callApi('post', 'infer-image', formData, (response) => setInvoice(response), null, setLoading);
+        callApi('post', 'infer-image', formData, (response) => setInvoice(response), onError, setLoading);
     };
 
     return (
@@ -46,6 +50,7 @@ const InvoiceClaims = () => {
                         acceptedFiles={[ 'application/pdf', 'image/jpeg', 'image/png' ]}
                         filesLimit={1}
                     />
+                    <Alert severity="error">{error}</Alert>
                 </>
             )}
             { (invoice && !loading) && (

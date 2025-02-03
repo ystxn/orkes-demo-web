@@ -15,19 +15,13 @@ const NavBarRoot = styled.div`
     align-items: center;
     background-color: ${props => props.color};
     padding: .5rem;
-    max-width: 100%;
     overflow: hidden;
+    flex-shrink: 0;
 
     .links {
-        flex: 1 1 1px;
-        min-width: 0;
         overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-
         p, div {
-            flex: 0 0 auto;
-            min-width: 0;
+            flex-shrink: 0;
             overflow: hidden;
         }
     }
