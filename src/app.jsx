@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import Approvals from './approvals';
 import Onboarding from './onboarding';
 import SemanticSearch from './semantic-search';
+import InvoiceClaims from './invoice-claims';
 
 const NavBarRoot = styled.div`
     display: flex;
@@ -14,6 +15,22 @@ const NavBarRoot = styled.div`
     align-items: center;
     background-color: ${props => props.color};
     padding: .5rem;
+    max-width: 100%;
+    overflow: hidden;
+
+    .links {
+        flex: 1 1 1px;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
+        p, div {
+            flex: 0 0 auto;
+            min-width: 0;
+            overflow: hidden;
+        }
+    }
 `;
 
 const Brand = styled(Typography)`
@@ -65,6 +82,7 @@ const BrandImage = styled.img`
 
 const navitems = [
     { label: 'Semantic Search', path: 'semantic-search', component: <SemanticSearch /> },
+    { label: 'Invoice Claims', path: 'invoice-claims', component: <InvoiceClaims /> },
     { label: 'Approvals', path: 'approvals', component: <Approvals /> },
     { label: 'Onboarding', path: 'onboarding', component: <Onboarding /> },
 ];
@@ -73,7 +91,7 @@ const NavBar = () => {
     const theme = useTheme();
     return (
         <NavBarRoot color={theme.palette.primary.main}>
-            <Stack direction="row">
+            <Stack direction="row" className="links">
                 <BrandImage src="logo-mark.svg" />
                 <Brand>
                     Orkes Labs
@@ -114,12 +132,14 @@ const App = ({ identity }) => {
             method,
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${identity}`,
             },
         };
+        if (!(body instanceof FormData)) {
+            config.headers['Content-Type'] = 'application/json';
+        }
         if (method.toLowerCase() === 'post') {
-            config.body = body ? JSON.stringify(body) : '{}';
+            config.body = !body ? '{}' : (body instanceof FormData) ? body : JSON.stringify(body);
         }
         fetch(`${origin}/demo/api/${path}`, config)
             .then(async (response) => {

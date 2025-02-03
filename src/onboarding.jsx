@@ -3,14 +3,11 @@ import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ConfigContext } from './app';
 import { Link } from 'react-router-dom';
+import { FlexBox } from './shared';
 
-const Root = styled.form`
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 1px;
+const Root = styled(FlexBox)`
     gap: .7rem;
     align-items: flex-start;
-
     .MuiAlert-root + .MuiTextField-root { margin-top: 1.5rem; }
     .MuiTextField-root { width: 25rem }
 `;
@@ -154,12 +151,14 @@ const Onboarding = () => {
     );
 
     return (
-        <Root onSubmit={handleSubmit}>
-            <Typography variant="h5" mb={2}>
-                Customer Onboarding
-            </Typography>
-            <Main />
-        </Root>
+        <form onSubmit={handleSubmit}>
+            <Root>
+                <Typography variant="h5" mb={2}>
+                    Customer Onboarding
+                </Typography>
+                <Main />
+            </Root>
+        </form>
     );
 };
 export default Onboarding;

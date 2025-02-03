@@ -8,13 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ConfigContext } from './app';
-
-const Root = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 1px;
-  gap: 1rem;
-`;
+import { FlexBox } from './shared';
 
 const SplitPane = styled.div`
     display: flex;
@@ -218,7 +212,7 @@ const Approvals = () => {
     };
 
     return (
-        <Root>
+        <FlexBox>
             <Typography variant="h5" mb={2}>
                 Expense Approvals
             </Typography>
@@ -261,7 +255,7 @@ const Approvals = () => {
                 </form>
             </SplitPane>
             <Toast theme={theme} snackbarOpen={snackbarOpen} setSnackbarOpen={setSnackbarOpen} />
-        </Root>
+        </FlexBox>
     );
 };
 export default Approvals;

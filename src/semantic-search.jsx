@@ -8,12 +8,9 @@ import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ConfigContext } from './app';
+import { FlexBox } from './shared';
 
-const Root = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 1px;
-  gap: 1rem;
+const Root = styled(FlexBox)`
   a,a:visited,a:active { color: inherit}
 `;
 

@@ -2,6 +2,8 @@ html, body {
     height: 100%;
     width: 100%;
     display: flex;
+    flex: 1 1 1px;
+    overflow: hidden;
     margin: 0;
     padding: 0;
 }
