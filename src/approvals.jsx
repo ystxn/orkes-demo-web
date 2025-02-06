@@ -9,29 +9,9 @@ import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ConfigContext } from './app';
 import { FlexBox } from './shared';
-
-const SplitPane = styled.div`
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-`;
-
-const Pane = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 1;
-    gap: 1rem;
-    height: fit-content;
-    &:last-child {
-        @media screen and (max-width: 600px) {
-            width: 96vw;
-            padding-bottom: 1rem;
-        }
-    }
-`;
+import { Invoice } from './invoice';
 
 const FormWrapper = styled.div`
-    padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: .8rem;
@@ -95,6 +75,9 @@ const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId, 
 };
 
 const TaskFields = ({ templateDef, originals, setResult }) => {
+    if (templateDef.name === 'InvoiceClaimForm') {
+        return <Invoice invoice={originals} />
+    }
     const [ innerOutputs, setInnerOutputs ] = useState(originals);
     const updateSwitch = (e, value) => setInnerOutputs((old) => ({ ...old, [e.target.name]: value }));
 
@@ -116,8 +99,7 @@ const TaskFields = ({ templateDef, originals, setResult }) => {
                 name={fieldName}
                 value={innerOutputs[fieldName]}
                 onChange={({ target }) => setInnerOutputs((old) => ({ ...old, [target.name]: target.value }))}
-                InputProps={{ readOnly: readonly }}
-
+                slotProps={{ htmlInput: { readOnly: readonly }}}
             />
         ) : (
             <FormControlLabel
@@ -164,8 +146,8 @@ const Approvals = () => {
     const { callApi } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(true);
     const [ humanTasks, setHumanTasks ] = useState([]);
-    const [ task, setTask ] = useState();
-    const [ templateDef, setTemplateDef ] = useState();
+    const [ task, setTask ] = useState(null);
+    const [ templateDef, setTemplateDef ] = useState(null);
     const [ snackbarOpen, setSnackbarOpen ] = useState(false);
     const [ outputs, setOutputs ] = useState({});
     const theme = useTheme();
@@ -176,7 +158,7 @@ const Approvals = () => {
     useEffect(listHumanTasks, []);
 
     const loadDetails = (t) => {
-        setTemplateDef(undefined);
+        setTemplateDef(null);
         setTask(t);
 
         const {
@@ -199,16 +181,16 @@ const Approvals = () => {
         }
         const onSuccess = () => {
             setSnackbarOpen(true);
-            setTemplateDef(undefined);
-            setTask(undefined);
+            setTemplateDef(null);
+            setTask(null);
             listHumanTasks();
         };
         callApi('post', `human-tasks/${task.taskId}`, outputs, onSuccess, null, setLoading);
     };
 
     const reset = () => {
-        setTemplateDef(undefined);
-        setTask(undefined);
+        setTemplateDef(null);
+        setTask(null);
     };
 
     return (
@@ -216,8 +198,11 @@ const Approvals = () => {
             <Typography variant="h5" mb={2}>
                 Expense Approvals
             </Typography>
-            <SplitPane>
-                <Pane>
+            <Paper elevation={5} sx={{ padding: '1rem' }}>
+                <FlexBox>
+                    <Typography variant="h6">
+                        Task List
+                    </Typography>
                     <TasksPane
                         loading={loading && !templateDef}
                         disabled={loading && templateDef}
@@ -226,34 +211,43 @@ const Approvals = () => {
                         currentTaskId={task?.taskId}
                         listHumanTasks={listHumanTasks}
                     />
-                </Pane>
-                <form onSubmit={claimAndComplete}>
-                    <Pane>
-                        { (loading && humanTasks.length > 0 && !templateDef) && <CircularProgress /> }
-                        { (templateDef && task) && (
-                            <>
-                                <Paper elevation={5}>
-                                    <FormWrapper>
-                                        <Stack direction="row" gap={1} flexWrap="wrap">
-                                            <Chip label={task.displayName} color="info" />
-                                            <Chip label={task.taskId} />
-                                        </Stack>
-                                        <TaskFields templateDef={templateDef} originals={outputs} setResult={setOutputs} />
-                                        <Stack direction="row" gap={1}>
-                                            <LoadingButton color="success" variant="contained" type="submit" loading={loading}>
-                                                Claim and Complete
-                                            </LoadingButton>
-                                            <Button variant="contained" color="inherit" onClick={reset}>
-                                                Cancel
-                                            </Button>
-                                        </Stack>
-                                    </FormWrapper>
-                                </Paper>
-                            </>
-                        )}
-                    </Pane>
-                </form>
-            </SplitPane>
+                </FlexBox>
+            </Paper>
+            <form onSubmit={claimAndComplete}>
+                { (loading && humanTasks.length > 0 && !templateDef) && <CircularProgress /> }
+                { (templateDef && task) && (
+                    <>
+                        <Paper elevation={5} sx={{ padding: '1rem' }}>
+                            <Typography variant="h6">
+                                Task Details
+                            </Typography>
+                            <FormWrapper>
+                                <Stack direction="row" gap={1} flexWrap="wrap">
+                                    <Chip label={task.displayName} color="info" />
+                                    <Chip label={task.taskId} />
+                                </Stack>
+                                <TaskFields
+                                    templateDef={templateDef}
+                                    originals={outputs}
+                                    setResult={setOutputs}
+                                />
+                                <Stack direction="row" gap={1}>
+                                    <LoadingButton color="success" variant="contained" type="submit" loading={loading}>
+                                        Approve
+                                    </LoadingButton>
+                                    <LoadingButton color="error" variant="contained" type="submit" loading={loading}>
+                                        Deny
+                                    </LoadingButton>
+                                    <Button variant="contained" color="inherit" onClick={reset}>
+                                        Cancel
+                                    </Button>
+                                </Stack>
+                            </FormWrapper>
+                        </Paper>
+                    </>
+                )}
+            </form>
+
             <Toast theme={theme} snackbarOpen={snackbarOpen} setSnackbarOpen={setSnackbarOpen} />
         </FlexBox>
     );
