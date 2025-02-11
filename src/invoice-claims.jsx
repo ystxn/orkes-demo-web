@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Invoice } from './invoice';
 
 const InvoiceClaims = () => {
-    const { callApi } = useContext(ConfigContext);
+    const { callApi, profile } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(false);
     const [ invoice, setInvoice ] = useState(null);
     const [ error, setError ] = useState(null);
@@ -26,8 +26,10 @@ const InvoiceClaims = () => {
         callApi('post', 'infer-image', formData, (response) => setInvoice(response), onError, setLoading);
     };
 
-    const handleSubmit = () =>
-        callApi('post', 'start/invoice-claim/1', invoice, (id) => setExecutionId(id), null, setLoading);
+    const handleSubmit = () => {
+        const data = { ...invoice, correlationId: profile.email }
+        callApi('post', 'start/invoice-claim/1', data, (id) => setExecutionId(id), null, setLoading);
+    };
 
     return (
         <FlexBox>
