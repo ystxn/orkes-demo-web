@@ -1,78 +1,15 @@
-import { Stack, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
-import { createContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
-import styled from 'styled-components';
 import Approvals from './approvals';
+import { ConfigContext } from './context';
+import InvoiceClaims from './invoice-claims';
 import Onboarding from './onboarding';
 import SemanticSearch from './semantic-search';
-import InvoiceClaims from './invoice-claims';
-
-const NavBarRoot = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: ${props => props.color};
-    padding: .5rem;
-    overflow: hidden;
-    flex-shrink: 0;
-
-    .links {
-        overflow: hidden;
-        p, div {
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-    }
-`;
-
-const Brand = styled(Typography)`
-    text-transform: uppercase;
-    color: white;
-    padding-right: 1.5rem;
-    align-self: center;
-    white-space: nowrap;
-    @media screen and (max-width: 600px) {
-        display: none
-    }
-`;
-
-const NavItem = styled.div`
-    color: white;
-    display: flex;
-    align-items: center;
-    a {
-        color: white !important;
-        line-height: 1rem;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-    &:not(:last-child)::after {
-        margin: .3rem;
-        content: '·';
-        font-size: 2rem;
-        line-height: .1rem;
-    }
-    &.cluster {
-        @media screen and (max-width: 600px) {
-            display: none
-        }
-    }
-`;
-
-const ContentRoot = styled.div`
-    padding: .5rem;
-    height: 100%;
-    display: flex;
-    flex: 1 1 1px;
-`;
-
-const BrandImage = styled.img`
-    height: 2rem;
-    padding-right: .3rem;
-    align-self: center;
-`;
+import { Brand, BrandImage, ContentRoot, NavBarRoot, NavItem } from './shared';
+import { CircularProgress } from '@mui/material';
 
 const navitems = [
     { label: 'Semantic Search', path: 'semantic-search', component: <SemanticSearch /> },
@@ -83,6 +20,7 @@ const navitems = [
 
 const NavBar = () => {
     const theme = useTheme();
+    const { clusterUrl } = useContext(ConfigContext);
     return (
         <NavBarRoot color={theme.palette.primary.main}>
             <Stack direction="row" className="links">
@@ -101,7 +39,7 @@ const NavBar = () => {
             <NavItem className="cluster">
                 <Button
                     component={Link}
-                    to="https://ys.orkesconductor.io"
+                    to={clusterUrl}
                     target="_blank"
                 >
                     Launch Cluster
@@ -111,83 +49,31 @@ const NavBar = () => {
     );
 };
 
-export const ConfigContext = createContext({
-    profile: {},
-    callApi: (method, path, body, onSuccess, onError, setLoading) => {},
-});
-
 const App = ({ identity }) => {
-    const origin = window.location.hostname === 'localhost' ? 'http://localhost:8080' : '';
-    const callApi = (method, path, body, onSuccess, onError, setLoading) => {
-        if (setLoading) {
-            setLoading(true);
-        }
-        const config = {
-            method,
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${identity}`,
-            },
-        };
-        if (!(body instanceof FormData)) {
-            config.headers['Content-Type'] = 'application/json';
-        }
-        if (method.toLowerCase() === 'post') {
-            config.body = !body ? '{}' : (body instanceof FormData) ? body : JSON.stringify(body);
-        }
-        fetch(`${origin}/demo/api/${path}`, config)
-            .then(async (response) => {
-                if (response.ok) {
-                    const data = await response.text();
-                    try {
-                        return JSON.parse(data);
-                    } catch (parseError) {
-                        return data;
-                    }
-                } else {
-                    throw new Error(JSON.stringify(response));
-                }
-            })
-            .then((response) => {
-                if (onSuccess) {
-                    onSuccess(response);
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                if (onError) {
-                    onError(error);
-                }
-            })
-            .finally(() => {
-                if (setLoading) {
-                    setLoading(false);
-                }
-            });
-    };
+    const [ loading, setLoading ] = useState(true);
+    const { setIdentity, setClusterUrl } = useContext(ConfigContext);
+    useEffect(() => {
+        console.log('App useEffect', new Date())
+        setClusterUrl('https://ys.orkesconductor.io');
+        setIdentity(identity);
+        setLoading(false);
+    }, []);
 
-    const base64Url = identity.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    const { family_name : lastName, given_name : firstName, email } = JSON.parse(jsonPayload);
-    const profile = { email, firstName, lastName };
-    const config = { profile, callApi };
+    const Content = () => (
+        <Routes>
+            { navitems.map(({ path, component }) => (
+                <Route key={path} path={`/demo/${path}`} element={component} />
+            ))}
+            <Route path="*" element={<Navigate to={`/demo/${navitems[0].path}`} />} />
+        </Routes>
+    );
 
     return (
         <BrowserRouter>
-            <ConfigContext.Provider value={config}>
-                <NavBar />
-                <ContentRoot>
-                    <Routes>
-                        { navitems.map(({ path, component }) => (
-                            <Route key={path} path={`/demo/${path}`} element={component} />
-                        ))}
-                        <Route path="*" element={<Navigate to={`/demo/${navitems[0].path}`} />} />
-                    </Routes>
-                </ContentRoot>
-            </ConfigContext.Provider>
+            <NavBar />
+            <ContentRoot>
+                { !loading ? <Content /> : <CircularProgress /> }
+            </ContentRoot>
         </BrowserRouter>
     );
 };

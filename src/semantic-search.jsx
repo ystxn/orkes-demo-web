@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { ConfigContext } from './app';
+import { ConfigContext } from './context';
 import { FlexBox } from './shared';
 
 const Root = styled(FlexBox)`
@@ -38,9 +38,9 @@ const BubbleRoot = styled.div`
   white-space: break-spaces;
 `;
 
-const Bubble = ({ message, executionId, color, icon }) => (
+const Bubble = ({ message, executionId, color, icon, clusterUrl }) => (
   <BubbleRoot color={color}>
-    { executionId ? <Link target="_blank" to={`https://ys.orkesconductor.io/execution/${executionId}`}>{icon}</Link> : icon }
+    { executionId ? <Link target="_blank" to={`${clusterUrl}/execution/${executionId}`}>{icon}</Link> : icon }
     { message }
   </BubbleRoot>
 );
@@ -48,14 +48,16 @@ const Bubble = ({ message, executionId, color, icon }) => (
 const defaultMessages = [{ result: 'Hello there' }];
 
 const SemanticSearch = () => {
-  const { callApi } = useContext(ConfigContext);
+  const { callApi, clusterUrl } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState(defaultMessages);
   const [ input, setInput ] = useState('How long will expired account data will be retained for?');
 
   const scrollToBottom = () => {
     const messageList = document.querySelector('#message-list');
-    messageList.scrollTop = messageList.scrollHeight;
+    if (messageList) {
+      messageList.scrollTop = messageList.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -116,6 +118,7 @@ const SemanticSearch = () => {
               executionId={message.executionId}
               color={index % 2 === 0 ? 'rgb(25, 118, 210)' : 'rgb(156, 39, 176)'}
               icon={index % 2 === 0 ? <FaceIcon /> : <Face2Icon />}
+              clusterUrl={clusterUrl}
             />
           )) }
       </MessageStack>

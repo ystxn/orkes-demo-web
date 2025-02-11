@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { ConfigContext } from './app';
+import { ConfigContext } from './context';
 import { FlexBox } from './shared';
 import { Invoice } from './invoice';
 
@@ -143,7 +143,7 @@ const Toast = ({ theme, snackbarOpen, setSnackbarOpen }) => (
 );
 
 const Approvals = () => {
-    const { callApi } = useContext(ConfigContext);
+    const { callApi, clusterUrl } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(true);
     const [ humanTasks, setHumanTasks ] = useState([]);
     const [ task, setTask ] = useState(null);
@@ -193,6 +193,8 @@ const Approvals = () => {
         setTask(null);
     };
 
+    const gotoTask = (taskId) => window.open(`${clusterUrl}/human/task/${taskId}`, '_blank').focus();
+
     return (
         <FlexBox>
             <Typography variant="h5" mb={2}>
@@ -224,7 +226,7 @@ const Approvals = () => {
                             <FormWrapper>
                                 <Stack direction="row" gap={1} flexWrap="wrap">
                                     <Chip label={task.displayName} color="info" />
-                                    <Chip label={task.taskId} />
+                                    <Chip label={task.taskId} onClick={() => gotoTask(task.taskId)} />
                                 </Stack>
                                 <TaskFields
                                     templateDef={templateDef}

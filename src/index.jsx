@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import App from './app';
 import './index.css';
 import { ThemeProvider, createTheme } from '@mui/material';
+import ConfigProvider from './context';
 
 const LoginRoot = styled.div`
     height: 100%;
@@ -49,7 +50,9 @@ const Main = () => {
   return (
     <ThemeProvider theme={theme}>
         <GoogleOAuthProvider clientId={clientId}>
-            { identity ? <App identity={identity} /> : <Login /> }
+            <ConfigProvider>
+                { identity ? <App identity={identity} /> : <Login /> }
+            </ConfigProvider>
         </GoogleOAuthProvider>
     </ThemeProvider>
   );

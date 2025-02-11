@@ -2,14 +2,14 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import { DropzoneArea } from 'mui-file-dropzone';
 import { useContext, useState } from 'react';
-import { ConfigContext } from './app';
+import { ConfigContext } from './context';
 import { FlexBox } from './shared';
 import { Alert } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Invoice } from './invoice';
 
 const InvoiceClaims = () => {
-    const { callApi, profile } = useContext(ConfigContext);
+    const { callApi, profile, clusterUrl } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(false);
     const [ invoice, setInvoice ] = useState(null);
     const [ error, setError ] = useState(null);
@@ -54,7 +54,7 @@ const InvoiceClaims = () => {
             { executionId && (
                 <Alert severity="success">
                     Your invoice has been successfully submitted. (
-                    <Link target="_blank" to={`https://ys.orkesconductor.io/execution/${executionId}`}>
+                    <Link target="_blank" to={`${clusterUrl}/execution/${executionId}`}>
                         View Execution
                     </Link>
                     )

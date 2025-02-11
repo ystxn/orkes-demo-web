@@ -1,7 +1,7 @@
 import { Alert, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { ConfigContext } from './app';
+import { ConfigContext } from './context';
 import { Link } from 'react-router-dom';
 import { FlexBox } from './shared';
 
@@ -23,7 +23,7 @@ const FlexAlert = styled(Alert)`
 const rootWorkflow = 'onboarding-wizard';
 
 const Onboarding = () => {
-    const { callApi, profile } = useContext(ConfigContext);
+    const { callApi, profile, clusterUrl } = useContext(ConfigContext);
     const [ loading, setLoading ] = useState(true);
     const [ stage, setStage ] = useState(1);
     const [ schema, setSchema ] = useState({});
@@ -118,7 +118,7 @@ const Onboarding = () => {
                 Stage {stage}:
                 {' '}
                 { stage === 1 && 'No existing workflow executions found. This submission will start an execution with email as correlation ID.' }
-                { stage > 1 && (<><Link target="_blank" to={`https://ys.orkesconductor.io/execution/${currentExecutionId}`}>Execution</Link> in progress. This submission will submit the data as a signal to the current yield task.</>) }
+                { stage > 1 && (<><Link target="_blank" to={`${clusterUrl}/execution/${currentExecutionId}`}>Execution</Link> in progress. This submission will submit the data as a signal to the current yield task.</>) }
             </Alert>
             { (stage < 3) && (
                 <Alert severity="warning">
