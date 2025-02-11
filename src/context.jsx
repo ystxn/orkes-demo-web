@@ -17,7 +17,6 @@ const ConfigProvider = ({ children }) => {
     const [ clusterUrl, setClusterUrl ] = useState();
 
     const doSetIdentity = (identity) => {
-        console.log('set identity as ', identity)
         setIdentity(identity);
         const base64Url = identity.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -29,7 +28,6 @@ const ConfigProvider = ({ children }) => {
     };
 
     const callApi = (method, path, body, onSuccess, onError, setLoading) => {
-        console.log('callApi', identity);
         if (setLoading) {
             setLoading(true);
         }

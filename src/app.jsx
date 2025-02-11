@@ -53,7 +53,6 @@ const App = ({ identity }) => {
     const [ loading, setLoading ] = useState(true);
     const { setIdentity, setClusterUrl } = useContext(ConfigContext);
     useEffect(() => {
-        console.log('App useEffect', new Date())
         setClusterUrl('https://ys.orkesconductor.io');
         setIdentity(identity);
         setLoading(false);

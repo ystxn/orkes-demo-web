@@ -2,7 +2,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FaceIcon from '@mui/icons-material/Face';
 import Face2Icon from '@mui/icons-material/Face2';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { IconButton, Stack, Typography } from '@mui/material';
+import { IconButton, MenuItem, Select, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -48,10 +48,28 @@ const Bubble = ({ message, executionId, color, icon, clusterUrl }) => (
 const defaultMessages = [{ result: 'Hello there' }];
 
 const SemanticSearch = () => {
-  const { callApi, clusterUrl } = useContext(ConfigContext);
+  const { callApi, clusterUrl, profile } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
   const [ messages, setMessages ] = useState(defaultMessages);
-  const [ input, setInput ] = useState('How long will expired account data will be retained for?');
+  const [ input, setInput ] = useState('');
+  const [ domain, setDomain ] = useState('policy');
+  const [ placeholder, setPlaceholder ] = useState('');
+  const [ workflowName, setWorkflowName ] = useState('');
+
+  const domainMap = {
+    policy: {
+      placeholder: 'How long will expired account data will be retained for?',
+      workflowName: 'policy-search/2',
+    },
+    finance: {
+      placeholder: 'Which companies performed the best in the last quarter?',
+      workflowName: 'news-context-search/1',
+    },
+    books: {
+      placeholder: 'Why did Dorothy not realise the wizard was fake?',
+      workflowName: 'books-search/2',
+    },
+  };
 
   const scrollToBottom = () => {
     const messageList = document.querySelector('#message-list');
@@ -80,6 +98,11 @@ const SemanticSearch = () => {
     }
   } , [ messages ]);
 
+  useEffect(() => {
+    setPlaceholder(domainMap[domain].placeholder);
+    setWorkflowName(domainMap[domain].workflowName);
+  }, [ domain ])
+
   const fireQuery = () => {
     setMessages((old) => [ ...old, { result: input } ]);
 
@@ -93,15 +116,29 @@ const SemanticSearch = () => {
       setInput('');
     };
     const onError = (error) => setMessages((old) => [ ...old, { result: 'Error: ' + error } ]);
-    callApi('post', 'execute/policy-search/2', { query: input }, onSuccess, onError, setLoading);
+    const data = { query: input, correlationId: profile.email };
+    callApi('post', `execute/${workflowName}`, data, onSuccess, onError, setLoading);
   };
 
   return (
     <Root>
       <Stack direction="row" justifyContent="space-between">
-        <Typography variant="h5">
-          Semantic Search
-        </Typography>
+        <Stack direction="row" gap={2}>
+          <Typography variant="h5">
+            Semantic Search for
+          </Typography>
+          <Select
+            size="small"
+            value={domain}
+            onChange={({ target }) => setDomain(target.value)}
+            sx={{ fontWeight: 500 }}
+          >
+            <MenuItem value="policy">Orkes Policies</MenuItem>
+            <MenuItem value="finance">Financial News</MenuItem>
+            <MenuItem value="books">Story Books</MenuItem>
+          </Select>
+        </Stack>
+
         <IconButton
           color="error"
           onClick={() => setMessages(defaultMessages)}
@@ -125,11 +162,11 @@ const SemanticSearch = () => {
       <Stack gap={2} direction="row">
         <TextField
           fullWidth
-          label="Query"
           multiline
           rows={2}
           disabled={loading}
           value={input}
+          placeholder={placeholder}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={({ key }) => (key === 'Enter') && fireQuery()}
         />
