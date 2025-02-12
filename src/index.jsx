@@ -26,36 +26,39 @@ const theme = createTheme({
 });
 
 const Main = () => {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const [ identity, setIdentity ] = useState('');
+    // @ts-ignore
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const [ identity, setIdentity ] = useState('');
 
-  const storeIdentity = ({ credential }) => {
-      window.localStorage.setItem('identity', credential);
-      setIdentity(credential);
-  };
+    const storeIdentity = (credentialResponse) => {
+        if (credentialResponse.credential) {
+            window.localStorage.setItem('identity', credentialResponse.credential);
+            setIdentity(credentialResponse.credential);
+        }
+    };
 
-  useEffect(() => {
-      const storedIdentity = window.localStorage.getItem('identity');
-      if (storedIdentity) {
-          setIdentity(storedIdentity);
-      }
-  }, []);
+    useEffect(() => {
+        const storedIdentity = window.localStorage.getItem('identity');
+        if (storedIdentity) {
+            setIdentity(storedIdentity);
+        }
+    }, []);
 
-  const Login = () => (
-      <LoginRoot>
-          <GoogleLogin onSuccess={(id) => storeIdentity(id)} />
-      </LoginRoot>
-  );
+    const Login = () => (
+        <LoginRoot>
+        <GoogleLogin onSuccess={(id) => storeIdentity(id)} />
+        </LoginRoot>
+    );
 
-  return (
-    <ThemeProvider theme={theme}>
+    return (
+        <ThemeProvider theme={theme}>
         <GoogleOAuthProvider clientId={clientId}>
-            <ConfigProvider>
-                { identity ? <App identity={identity} /> : <Login /> }
-            </ConfigProvider>
+        <ConfigProvider>
+        { identity ? <App identity={identity} /> : <Login /> }
+        </ConfigProvider>
         </GoogleOAuthProvider>
-    </ThemeProvider>
-  );
+        </ThemeProvider>
+    );
 };
 
 ReactDOM.createRoot(document.getElementById('root')).render(<Main />);

@@ -22,7 +22,7 @@ const MessageStack = styled(Stack)`
   padding-bottom: .5rem;
 `
 
-const BubbleRoot = styled.div`
+const BubbleRoot = styled.div<{ color?: string }>`
   color: ${props => props.color};
   border-color: ${props => props.color};
   border-width: 1px;
@@ -45,12 +45,17 @@ const Bubble = ({ message, executionId, color, icon, clusterUrl }) => (
   </BubbleRoot>
 );
 
+interface Message {
+  result: string;
+  executionId?: string;
+}
+
 const defaultMessages = [{ result: 'Hello there' }];
 
 const SemanticSearch = () => {
   const { callApi, clusterUrl, profile } = useContext(ConfigContext);
   const [ loading, setLoading ] = useState(false);
-  const [ messages, setMessages ] = useState(defaultMessages);
+  const [ messages, setMessages ] = useState<Message[]>(defaultMessages);
   const [ input, setInput ] = useState('');
   const [ domain, setDomain ] = useState('policy');
   const [ placeholder, setPlaceholder ] = useState('');
