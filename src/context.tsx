@@ -1,20 +1,29 @@
-import { createContext, useState } from "react";
+import { createContext, useState } from 'react';
 
-export const ConfigContext = createContext({
-    profile: null,
-    identity: null,
-    setIdentity: (identity) => {},
-    clusterUrl: null,
-    setClusterUrl: (clusterUrl) => {},
-    callApi: (method, path, body, onSuccess, onError, setLoading) => {},
-});
+interface ConfigContextType {
+    profile: any | null;
+    identity: any | null;
+    setIdentity: (identity: any) => void;
+    clusterUrl: string | null;
+    setClusterUrl: (clusterUrl: string) => void;
+    callApi: (
+        method: string,
+        path: string,
+        body?: any,
+        onSuccess?: (data: any) => void,
+        onError?: (error: any) => void,
+        setLoading?: (loading: boolean) => void
+    ) => void;
+}
+
+export const ConfigContext = createContext<ConfigContextType>({} as ConfigContextType);
 
 const origin = window.location.hostname === 'localhost' ? 'http://localhost:8080' : '';
 
 const ConfigProvider = ({ children }) => {
     const [ profile, setProfile ] = useState({});
     const [ identity, setIdentity ] = useState();
-    const [ clusterUrl, setClusterUrl ] = useState();
+    const [ clusterUrl, setClusterUrl ] = useState<string | null>(null);
 
     const doSetIdentity = (identity) => {
         setIdentity(identity);
@@ -33,6 +42,7 @@ const ConfigProvider = ({ children }) => {
         }
         const config = {
             method,
+            body: undefined,
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${identity}`,
@@ -75,7 +85,7 @@ const ConfigProvider = ({ children }) => {
             });
     };
 
-    const value = {
+    const value : ConfigContextType = {
         profile,
         identity,
         setIdentity: doSetIdentity,

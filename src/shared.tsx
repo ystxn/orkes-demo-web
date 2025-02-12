@@ -1,16 +1,17 @@
 import styled from 'styled-components';
 import Typography from '@mui/material/Typography';
 
-export const FlexBox = styled.div`
+export const FlexBox = styled.div<{ width?: number }>`
   display: flex;
   flex-direction: column;
   flex: 1 1 1px;
   gap: 1rem;
+  width: ${props => props.width ? props.width + 'rem' : 'auto'};
   &:empty { display: none }
   .MuiAlert-root:has(> .MuiAlert-message:empty) { display: none }
 `;
 
-export const NavBarRoot = styled.div`
+export const NavBarRoot = styled.div<{ color?: string }>`
     display: flex;
     justify-content: space-between;
     align-items: center;
