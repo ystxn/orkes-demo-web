@@ -234,11 +234,8 @@ const Approvals = () => {
                                     setResult={setOutputs}
                                 />
                                 <Stack direction="row" gap={1}>
-                                    <LoadingButton color="success" variant="contained" type="submit" loading={loading}>
-                                        Approve
-                                    </LoadingButton>
-                                    <LoadingButton color="error" variant="contained" type="submit" loading={loading}>
-                                        Deny
+                                    <LoadingButton color="info" variant="contained" type="submit" loading={loading}>
+                                        Submit
                                     </LoadingButton>
                                     <Button variant="contained" color="inherit" onClick={reset}>
                                         Cancel
