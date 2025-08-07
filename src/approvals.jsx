@@ -1,5 +1,4 @@
 import CloseIcon from '@mui/icons-material/Close';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { Button, Chip, FormControlLabel, IconButton, Paper, Snackbar, Stack, Switch } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
@@ -42,14 +41,14 @@ const TasksPaneEmptyState = ({ listHumanTasks }) => {
     return (
         <>
             <Typography>No pending human tasks</Typography>
-            <LoadingButton
+            <Button
                 variant="contained"
                 color="secondary"
                 onClick={launchExpensesWorkflow}
                 loading={loading}
             >
                 Launch Expenses Workflow
-            </LoadingButton>
+            </Button>
         </>
     );
 }
@@ -61,14 +60,14 @@ const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId, 
     return humanTasks.map((task) => (
         <TasksPaneItem key={task.taskId}>
             <Chip color={currentTaskId === task.taskId ? 'secondary' : undefined} label={formatDate(task.createdOn)} />
-            <LoadingButton
+            <Button
                 variant="contained"
                 onClick={() => loadDetails(task)}
                 loading={loading}
                 disabled={disabled || currentTaskId === task.taskId}
             >
                 Open Task Details
-            </LoadingButton>
+            </Button>
             <Chip color={currentTaskId === task.taskId ? 'info' : undefined}  label={task.displayName} />
         </TasksPaneItem>
     ));
@@ -234,9 +233,9 @@ const Approvals = () => {
                                     setResult={setOutputs}
                                 />
                                 <Stack direction="row" gap={1}>
-                                    <LoadingButton color="info" variant="contained" type="submit" loading={loading}>
+                                    <Button color="info" variant="contained" type="submit" loading={loading}>
                                         Submit
-                                    </LoadingButton>
+                                    </Button>
                                     <Button variant="contained" color="inherit" onClick={reset}>
                                         Cancel
                                     </Button>

@@ -1,8 +1,7 @@
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FaceIcon from '@mui/icons-material/Face';
 import Face2Icon from '@mui/icons-material/Face2';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { IconButton, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { IconButton, Button, MenuItem, Select, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -175,13 +174,13 @@ const SemanticSearch = () => {
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={({ key }) => (key === 'Enter') && fireQuery()}
         />
-        <LoadingButton
+        <Button
           variant="contained"
           loading={loading}
           onClick={fireQuery}
         >
           Ask
-        </LoadingButton>
+        </Button>
       </Stack>
     </Root>
   )
