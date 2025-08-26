@@ -10,12 +10,14 @@ import Onboarding from './onboarding';
 import SemanticSearch from './semantic-search';
 import { Brand, BrandImage, ContentRoot, NavBarRoot, NavItem } from './shared';
 import { CircularProgress } from '@mui/material';
+import Ecommerce from './ecommerce';
 
 const navitems = [
     { label: 'Semantic Search', path: 'semantic-search', component: <SemanticSearch /> },
     { label: 'Invoice Claims', path: 'invoice-claims', component: <InvoiceClaims /> },
     { label: 'Approvals', path: 'approvals', component: <Approvals /> },
     { label: 'Onboarding', path: 'onboarding', component: <Onboarding /> },
+    { label: 'e-Commerce', path: 'e-commerce', component: <Ecommerce /> },
 ];
 
 const NavBar = () => {

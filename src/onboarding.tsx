@@ -113,7 +113,7 @@ const Onboarding = () => {
     );
 
     const Main = () => loading ? <CircularProgress /> : completedPayload ? <Completed /> : (
-        <>
+        <form onSubmit={handleSubmit} style={{ display: 'contents' }}>
             <Alert severity="info">
                 Stage {stage}:
                 {' '}
@@ -147,18 +147,16 @@ const Onboarding = () => {
             >
                 Next Step
             </Button>
-        </>
+        </form>
     );
 
     return (
-        <form onSubmit={handleSubmit}>
-            <Root>
-                <Typography variant="h5" mb={2}>
-                    Customer Onboarding
-                </Typography>
-                <Main />
-            </Root>
-        </form>
+        <>
+            <Typography variant="h5" mb={2}>
+                Customer Onboarding
+            </Typography>
+            <Main />
+        </>
     );
 };
 export default Onboarding;

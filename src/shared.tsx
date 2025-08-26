@@ -7,8 +7,7 @@ export const FlexBox = styled.div<{ width?: number }>`
   flex: 1 1 1px;
   gap: 1rem;
   width: ${props => props.width ? props.width + 'rem' : 'auto'};
-  &:empty { display: none }
-  .MuiAlert-root:has(> .MuiAlert-message:empty) { display: none }
+
 `;
 
 export const NavBarRoot = styled.div<{ color?: string }>`
@@ -68,6 +67,11 @@ export const ContentRoot = styled.div`
     height: 100%;
     display: flex;
     flex: 1 1 1px;
+    flex-direction: column;
+    gap: .5rem;
+
+    &:empty { display: none }
+    .MuiAlert-root:has(> .MuiAlert-message:empty) { display: none }
 `;
 
 export const BrandImage = styled.img`

@@ -9,10 +9,6 @@ import styled from 'styled-components';
 import { ConfigContext } from './context';
 import { FlexBox } from './shared';
 
-const Root = styled(FlexBox)`
-  a,a:visited,a:active { color: inherit }
-`;
-
 const MessageStack = styled(Stack)`
   overflow-y: auto;
   flex: 1 1 1px;
@@ -125,7 +121,7 @@ const SemanticSearch = () => {
   };
 
   return (
-    <Root>
+    <>
       <Stack direction="row" justifyContent="space-between">
         <Stack direction="row" gap={2}>
           <Typography variant="h5">
@@ -182,7 +178,7 @@ const SemanticSearch = () => {
           Ask
         </Button>
       </Stack>
-    </Root>
+    </>
   )
 };
 

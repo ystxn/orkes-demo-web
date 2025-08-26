@@ -195,7 +195,7 @@ const Approvals = () => {
     const gotoTask = (taskId) => window.open(`${clusterUrl}/human/task/${taskId}`, '_blank').focus();
 
     return (
-        <FlexBox>
+        <>
             <Typography variant="h5" mb={2}>
                 Expense Approvals
             </Typography>
@@ -247,7 +247,7 @@ const Approvals = () => {
             </form>
 
             <Toast theme={theme} snackbarOpen={snackbarOpen} setSnackbarOpen={setSnackbarOpen} />
-        </FlexBox>
+        </>
     );
 };
 export default Approvals;

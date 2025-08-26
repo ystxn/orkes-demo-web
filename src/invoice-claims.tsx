@@ -53,7 +53,7 @@ const InvoiceClaims = () => {
     };
 
     return (
-        <FlexBox>
+        <>
             <Typography variant="h5" mb={2}>
                 Invoice Claims
             </Typography>
@@ -88,7 +88,7 @@ const InvoiceClaims = () => {
                     <SampleInvoiceItem label="Large Invoice" file="invoice-large.pdf" />
                 </List>
             </FlexBox>
-        </FlexBox>
+        </>
     );
 };
 export default InvoiceClaims;
