@@ -232,9 +232,17 @@ const ECommerce = () => {
     const [ checkoutOpen, setCheckoutOpen ] = useState(false);
     const totalItems = Object.values(cart).reduce((sum: number, quantity: number) => sum + quantity, 0);
 
+    const setResults = ({ output }) => setProducts(output.result);
+
     useEffect(() => {
-        const data = { correlationId: profile.email };
-        callApi('post', 'execute/ecommerce-list-products/1', data, ({ output }) => setProducts(output.result));
+        const workflowName = 'ecommerce-list-products';
+        callApi('get', `search-executions?workflowName=${workflowName}&status=COMPLETED`, null, (executions) => {
+            if (executions.length === 0) {
+                callApi('post', `execute/${workflowName}/1`, null, setResults);
+            } else {
+                callApi('get', `execution/${executions[0].workflowId}`, null, setResults);
+            }
+        });
     }, []);
 
     const Main = () => {

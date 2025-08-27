@@ -64,7 +64,18 @@ const ConfigProvider = ({ children }) => {
                         return data;
                     }
                 } else {
-                    throw new Error(JSON.stringify(response));
+                    const error = {
+                        status: response.status,
+                        statusText: response.statusText,
+                        body: await response.json(),
+                    };
+                    if (error.status === 403) {
+                        window.localStorage.clear();
+                        window.location.reload();
+                        return;
+                    }
+                    console.error(error);
+                    throw new Error(JSON.stringify(error.body));
                 }
             })
             .then((response) => {
@@ -73,7 +84,6 @@ const ConfigProvider = ({ children }) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 if (onError) {
                     onError(error);
                 }

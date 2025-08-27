@@ -68,7 +68,7 @@ const Onboarding = () => {
                 callApi('get', `execution/${executions[0].workflowId}`, null, loadInProgressTask);
             }
         };
-        const uri = `search-executions?workflowName=${rootWorkflow}&identityCorrelation=true`;
+        const uri = `search-executions?workflowName=${rootWorkflow}&status=RUNNING&identityCorrelation=true`;
         callApi('get', uri, null, onSuccess);
     }, []);
 
