@@ -151,12 +151,12 @@ const Onboarding = () => {
     );
 
     return (
-        <>
+        <Root>
             <Typography variant="h5" mb={2}>
                 Customer Onboarding
             </Typography>
             <Main />
-        </>
+        </Root>
     );
 };
 export default Onboarding;
