@@ -1,13 +1,12 @@
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FaceIcon from '@mui/icons-material/Face';
 import Face2Icon from '@mui/icons-material/Face2';
-import { IconButton, Button, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Button, IconButton, MenuItem, Select, Stack, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ConfigContext } from './context';
-import { FlexBox } from './shared';
 
 const MessageStack = styled(Stack)`
   overflow-y: auto;
@@ -33,9 +32,13 @@ const BubbleRoot = styled.div<{ color?: string }>`
   white-space: break-spaces;
 `;
 
+const BubbleLink = styled(Link)`
+  color: inherit;
+`;
+
 const Bubble = ({ message, executionId, color, icon, clusterUrl }) => (
   <BubbleRoot color={color}>
-    { executionId ? <Link target="_blank" to={`${clusterUrl}/execution/${executionId}`}>{icon}</Link> : icon }
+    { executionId ? <BubbleLink target="_blank" to={`${clusterUrl}/execution/${executionId}`}>{icon}</BubbleLink> : icon }
     { message }
   </BubbleRoot>
 );

@@ -1,7 +1,10 @@
+import { Add, CheckCircle, Remove, ShoppingCart } from "@mui/icons-material";
+import {
+    Badge, Box, Button, Card, CardActions, CardContent, CardMedia, CircularProgress, Dialog,
+    DialogActions, DialogContent, DialogTitle, Divider, Fab, IconButton, Link, Stack, Zoom
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { Card, CardMedia, CardContent, CardActions, Box, Button, IconButton, Badge, Fab, CircularProgress, Stack, Dialog, DialogTitle, DialogContent, DialogActions, Divider, Zoom } from "@mui/material";
-import { Add, Remove, ShoppingCart, CheckCircle } from "@mui/icons-material";
-import { useState, useEffect, useContext } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import { ConfigContext } from "./context";
 
@@ -19,9 +22,18 @@ const FloatingBadge = styled.div`
     z-index: 1000;
 `;
 
+const usePrevious = <T,>(value: T): T | undefined => {
+    const ref = useRef<T | undefined>(undefined);
+    useEffect(() => {
+        ref.current = value;
+    }, [value]);
+    return ref.current;
+};
+
 const buildImageUrl = (unsplashId) => `https://images.unsplash.com/photo-${unsplashId}?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`;
 
-const CheckoutOverlay = ({ open, onClose, cart, products, onPaymentComplete }) => {
+const CheckoutOverlay = ({ open, onClose, cart, products, onPaymentComplete, executionId }) => {
+    const { callApi } = useContext(ConfigContext);
     const [ isProcessingPayment, setIsProcessingPayment ] = useState(false);
     const [ showPaymentSuccess, setShowPaymentSuccess ] = useState(false);
 
@@ -38,7 +50,8 @@ const CheckoutOverlay = ({ open, onClose, cart, products, onPaymentComplete }) =
     const handlePayment = async () => {
         setIsProcessingPayment(true);
 
-        setTimeout(() => {
+        const data = { action: "CHECKOUT", cart };
+        callApi('post', `signal/${executionId}`, data, () => {
             setIsProcessingPayment(false);
             setShowPaymentSuccess(true);
 
@@ -47,7 +60,7 @@ const CheckoutOverlay = ({ open, onClose, cart, products, onPaymentComplete }) =
                 onPaymentComplete();
                 onClose();
             }, 2000);
-        }, 1500);
+        });
     };
 
     const handleClose = () => {
@@ -148,6 +161,13 @@ const CheckoutOverlay = ({ open, onClose, cart, products, onPaymentComplete }) =
 
 const ProductCards = ({ items, cart, setCart }) => {
     const updateQuantity = (itemName, change) => {
+        if (cart[itemName] && (cart[itemName] + change) === 0) {
+            setCart(prev => {
+                const { [itemName]: _, ...rest } = prev;
+                return rest;
+            });
+            return;
+        }
         setCart(prev => ({
             ...prev,
             [itemName]: Math.max(0, (prev[itemName] || 0) + change)
@@ -226,10 +246,13 @@ type Product = {
 };
 
 const ECommerce = () => {
-    const { callApi, profile } = useContext(ConfigContext);
+    const { callApi, profile, clusterUrl } = useContext(ConfigContext);
     const [ products, setProducts ] = useState<Product[]>([]);
     const [ cart, setCart ] = useState<{[key: string]: number}>({});
+    const prevCart = usePrevious(cart);
+    const [ executionId, setExecutionId ] = useState<string | null>(null);
     const [ checkoutOpen, setCheckoutOpen ] = useState(false);
+    const [ init, setInit ] = useState(false);
     const totalItems = Object.values(cart).reduce((sum: number, quantity: number) => sum + quantity, 0);
 
     const setResults = ({ output }) => setProducts(output.result);
@@ -243,7 +266,51 @@ const ECommerce = () => {
                 callApi('get', `execution/${executions[0].workflowId}`, null, setResults);
             }
         });
+        callApi('get', `search-executions?workflowName=ecommerce-cart&status=RUNNING&identityCorrelation=true`, null, (executions) => {
+            if (executions.length > 0) {
+                setExecutionId(executions[0].workflowId);
+                callApi('get', `execution/${executions[0].workflowId}`, null, ({ variables }) => {
+                    setCart(variables.cart);
+                    setTimeout(() => setInit(true), 500);
+                });
+            } else {
+                setInit(true);
+            }
+        });
     }, []);
+
+    useEffect(() => {
+        if (!init || Object.keys(cart).length === 0 || !prevCart) {
+            return;
+        }
+        const changed: Record<string, { prev: number; next: number }> = {};
+        for (const key of new Set([...Object.keys(prevCart), ...Object.keys(cart)])) {
+            if (prevCart[key] !== cart[key]) {
+                changed[key] = { prev: prevCart[key], next: cart[key] };
+            }
+        }
+        const item = Object.keys(changed).at(0);
+        const quantity = (changed[item]?.next || 0) - (changed[item]?.prev || 0);
+        const data = { action: "MODIFY_CART", cart, item, quantity };
+
+        if (quantity === 0) {
+            return;
+        }
+        if (!executionId) {
+            const correlationData = { correlationId: profile.email };
+            callApi('post', 'execute/ecommerce-cart/1', correlationData, (execution) => {
+                setExecutionId(execution.workflowId);
+                callApi('post', `signal/${execution.workflowId}?async=true`, data);
+            });
+        } else {
+            callApi('post', `signal/${executionId}?async=true`, data);
+        }
+    }, [ cart ]);
+
+    const reset = () => {
+        setCart({});
+        setExecutionId(null);
+    };
 
     const Main = () => {
         if (products.length === 0 ) {
@@ -251,7 +318,11 @@ const ECommerce = () => {
         }
         return (
             <>
-                <ProductCards items={products} cart={cart} setCart={setCart} />
+                <ProductCards
+                    items={products}
+                    cart={cart}
+                    setCart={setCart}
+                />
                 <FloatingBadge>
                     <Badge badgeContent={totalItems} color="warning">
                         <Fab
@@ -269,7 +340,8 @@ const ECommerce = () => {
                     onClose={() => setCheckoutOpen(false)}
                     cart={cart}
                     products={products}
-                    onPaymentComplete={() => setCart({})}
+                    onPaymentComplete={reset}
+                    executionId={executionId}
                 />
             </>
         );
@@ -277,9 +349,21 @@ const ECommerce = () => {
 
     return (
         <>
-            <Typography variant="h5" mb={2}>
-                eCommerce
-            </Typography>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="h5" mb={2}>
+                    eCommerce
+                </Typography>
+                <Button
+                    variant="contained"
+                    color="info"
+                    component={Link}
+                    href={`${clusterUrl}/execution/${executionId}`}
+                    target="_blank"
+                    disabled={!executionId}
+                >
+                    View Execution
+                </Button>
+            </Stack>
             <Main />
         </>
     )

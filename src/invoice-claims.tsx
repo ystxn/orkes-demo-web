@@ -48,7 +48,7 @@ const InvoiceClaims = () => {
     };
 
     const handleSubmit = () => {
-        const data = { ...invoice, correlationId: profile.email }
+        const data = { ...invoice, correlationId: profile.email };
         callApi('post', 'start/invoice-claim/1', data, (id) => setExecutionId(id), null, setLoading);
     };
 
