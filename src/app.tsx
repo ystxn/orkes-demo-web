@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Approvals from './approvals';
 import { ConfigContext } from './context';
-import Ecommerce from './ecommerce';
+import Ecommerce from './ecommerce/ecommerce';
 import InvoiceClaims from './invoice-claims';
 import Onboarding from './onboarding';
 import SemanticSearch from './semantic-search';

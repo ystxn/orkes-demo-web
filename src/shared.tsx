@@ -38,3 +38,20 @@ export const ContentRoot = styled.div`
     &:empty { display: none }
     .MuiAlert-root:has(> .MuiAlert-message:empty) { display: none }
 `;
+
+export const buildImageUrl = (unsplashId) =>
+    `https://images.unsplash.com/photo-${unsplashId}?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`;
+
+export const formatDate = (date) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const formatter = new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: userTimeZone
+    });
+    return formatter.format(new Date(date)).replace(",", "");
+};
