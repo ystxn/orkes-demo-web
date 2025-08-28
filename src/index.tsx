@@ -21,7 +21,7 @@ const LoginRoot = styled.div`
 const theme = createTheme({
     palette: {
         primary: { main: '#6c37bd' },
-        secondary: { main: '#ffc200' },
+        secondary: { main: '#b08aea' },
     },
 });
 
