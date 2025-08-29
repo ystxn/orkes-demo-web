@@ -3,7 +3,7 @@ import {
     Box, Button,
     CircularProgress, Dialog,
     DialogActions, DialogContent, DialogTitle, Divider,
-    Stack, Zoom
+    Stack, Zoom, useMediaQuery, useTheme
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { useContext, useState } from "react";
@@ -12,6 +12,8 @@ import { buildImageUrl } from "../shared";
 
 const CheckoutOverlay = ({ open, onClose, cart, products, onPaymentComplete, executionId }) => {
     const { callApi } = useContext(ConfigContext);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [ isProcessingPayment, setIsProcessingPayment ] = useState(false);
     const [ showPaymentSuccess, setShowPaymentSuccess ] = useState(false);
 
@@ -49,7 +51,12 @@ const CheckoutOverlay = ({ open, onClose, cart, products, onPaymentComplete, exe
 
     if (showPaymentSuccess) {
         return (
-            <Dialog open={open} maxWidth="sm" fullWidth>
+            <Dialog
+                open={open}
+                maxWidth="sm"
+                fullWidth
+                fullScreen={isMobile}
+            >
                 <DialogContent sx={{ textAlign: 'center', py: 6 }}>
                     <Zoom in={showPaymentSuccess}>
                         <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
@@ -66,7 +73,13 @@ const CheckoutOverlay = ({ open, onClose, cart, products, onPaymentComplete, exe
     }
 
     return (
-        <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            maxWidth="md"
+            fullWidth
+            fullScreen={isMobile}
+        >
             <DialogTitle>
                 Checkout
             </DialogTitle>
