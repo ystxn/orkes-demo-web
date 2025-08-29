@@ -92,13 +92,9 @@ const NavBar = () => {
 };
 
 const App = ({ identity }) => {
-    const [ loading, setLoading ] = useState(true);
-    const { setIdentity, setClusterUrl } = useContext(ConfigContext);
-    useEffect(() => {
-        setClusterUrl('https://ys.orkesconductor.io');
-        setIdentity(identity);
-        setLoading(false);
-    }, []);
+    const { init, profile } = useContext(ConfigContext);
+
+    useEffect(() => init(identity, 'https://ys.orkesconductor.io'), []);
 
     const Content = () => (
         <Routes>
@@ -113,7 +109,7 @@ const App = ({ identity }) => {
         <BrowserRouter>
             <NavBar />
             <ContentRoot>
-                { !loading ? <Content /> : <CircularProgress /> }
+                { profile.email ? <Content /> : <CircularProgress /> }
             </ContentRoot>
         </BrowserRouter>
     );

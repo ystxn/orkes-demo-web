@@ -1,11 +1,10 @@
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 
 interface ConfigContextType {
     profile: any | null;
-    identity: any | null;
-    setIdentity: (identity: any) => void;
+    identity: string | null;
     clusterUrl: string | null;
-    setClusterUrl: (clusterUrl: string) => void;
+    init: (identity: string, clusterUrl: string) => void;
     callApi: (
         method: string,
         path: string,
@@ -22,11 +21,16 @@ const origin = window.location.hostname === 'localhost' ? 'http://localhost:8080
 
 const ConfigProvider = ({ children }) => {
     const [ profile, setProfile ] = useState({});
-    const [ identity, setIdentity ] = useState();
+    const [ identity, setIdentity ] = useState<string | null>();
     const [ clusterUrl, setClusterUrl ] = useState<string | null>(null);
 
-    const doSetIdentity = (identity) => {
-        setIdentity(identity);
+    useEffect(() => {
+        if (identity) {
+            callApi('post', 'hello', null, postSetIdentity, () => {}, () => {});
+        }
+    }, [ identity ]);
+
+    const postSetIdentity = () => {
         const base64Url = identity.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
@@ -95,12 +99,16 @@ const ConfigProvider = ({ children }) => {
             });
     };
 
+    const init = (identity, clusterUrl) => {
+        setIdentity(identity);
+        setClusterUrl(clusterUrl);
+    };
+
     const value : ConfigContextType = {
         profile,
         identity,
-        setIdentity: doSetIdentity,
         clusterUrl,
-        setClusterUrl,
+        init,
         callApi,
     };
 
