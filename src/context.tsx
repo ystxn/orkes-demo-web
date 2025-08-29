@@ -4,7 +4,7 @@ interface ConfigContextType {
     profile: any | null;
     identity: string | null;
     clusterUrl: string | null;
-    init: (identity: string, clusterUrl: string) => void;
+    setIdentity: (identity: string) => void;
     callApi: (
         method: string,
         path: string,
@@ -26,11 +26,12 @@ const ConfigProvider = ({ children }) => {
 
     useEffect(() => {
         if (identity) {
-            callApi('post', 'hello', null, postSetIdentity, () => {}, () => {});
+            callApi('get', 'config', null, postSetIdentity, () => {}, () => {});
         }
     }, [ identity ]);
 
-    const postSetIdentity = () => {
+    const postSetIdentity = (config) => {
+        setClusterUrl(config.conductorServerUrl);
         const base64Url = identity.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
@@ -99,16 +100,11 @@ const ConfigProvider = ({ children }) => {
             });
     };
 
-    const init = (identity, clusterUrl) => {
-        setIdentity(identity);
-        setClusterUrl(clusterUrl);
-    };
-
     const value : ConfigContextType = {
         profile,
         identity,
         clusterUrl,
-        init,
+        setIdentity,
         callApi,
     };
 

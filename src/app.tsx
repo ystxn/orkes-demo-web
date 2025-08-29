@@ -92,9 +92,9 @@ const NavBar = () => {
 };
 
 const App = ({ identity }) => {
-    const { init, profile } = useContext(ConfigContext);
+    const { setIdentity, profile } = useContext(ConfigContext);
 
-    useEffect(() => init(identity, 'https://ys.orkesconductor.io'), []);
+    useEffect(() => setIdentity(identity), []);
 
     const Content = () => (
         <Routes>
