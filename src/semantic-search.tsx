@@ -1,7 +1,7 @@
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FaceIcon from '@mui/icons-material/Face';
 import Face2Icon from '@mui/icons-material/Face2';
-import { Button, IconButton, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Button, IconButton, MenuItem, Select, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -58,6 +58,8 @@ const SemanticSearch = () => {
   const [ domain, setDomain ] = useState('policy');
   const [ placeholder, setPlaceholder ] = useState('');
   const [ workflowName, setWorkflowName ] = useState('');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const domainMap = {
     policy: {
@@ -126,9 +128,9 @@ const SemanticSearch = () => {
   return (
     <>
       <Stack direction="row" justifyContent="space-between">
-        <Stack direction="row" gap={2}>
+        <Stack direction="row" gap={2} alignItems="center">
           <Typography variant="h5">
-            Semantic Search for
+            { isMobile ? 'Search' : 'Semantic Search for' }
           </Typography>
           <Select
             size="small"

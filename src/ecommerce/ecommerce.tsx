@@ -146,8 +146,8 @@ const ECommerce = () => {
 
     return (
         <>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="h5" mb={2}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h5">
                     eCommerce
                 </Typography>
                 <Stack direction="row" gap={2}>

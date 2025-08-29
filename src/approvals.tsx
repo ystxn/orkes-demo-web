@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { ConfigContext } from './context';
 import { FlexBox } from './shared';
 import { Invoice } from './invoice';
+import { formatDate } from './shared';
 
 const FormWrapper = styled.div`
     display: flex;
@@ -21,16 +22,6 @@ const TasksPaneItem = styled.div`
     flex-wrap: wrap;
     gap: 1rem;
 `;
-
-const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-});
-const formatDate = (epoch) => (dateTimeFormat.format(new Date(epoch)));
 
 const TasksPaneEmptyState = ({ listHumanTasks }) => {
     const { callApi } = useContext(ConfigContext);
@@ -66,9 +57,8 @@ const TasksPane = ({ loading, disabled, humanTasks, loadDetails, currentTaskId, 
                 loading={loading}
                 disabled={disabled || currentTaskId === task.taskId}
             >
-                Open Task Details
+                {task.displayName}
             </Button>
-            <Chip color={currentTaskId === task.taskId ? 'info' : undefined}  label={task.displayName} />
         </TasksPaneItem>
     ));
 };
@@ -217,32 +207,30 @@ const Approvals = () => {
             <form onSubmit={claimAndComplete}>
                 { (loading && humanTasks.length > 0 && !templateDef) && <CircularProgress /> }
                 { (templateDef && task) && (
-                    <>
-                        <Paper elevation={5} sx={{ padding: '1rem' }}>
-                            <Typography variant="h6">
-                                Task Details
-                            </Typography>
-                            <FormWrapper>
-                                <Stack direction="row" gap={1} flexWrap="wrap">
-                                    <Chip label={task.displayName} color="info" />
-                                    <Chip label={task.taskId} onClick={() => gotoTask(task.taskId)} />
-                                </Stack>
-                                <TaskFields
-                                    templateDef={templateDef}
-                                    originals={outputs}
-                                    setResult={setOutputs}
-                                />
-                                <Stack direction="row" gap={1}>
-                                    <Button color="info" variant="contained" type="submit" loading={loading}>
-                                        Submit
-                                    </Button>
-                                    <Button variant="contained" color="inherit" onClick={reset}>
-                                        Cancel
-                                    </Button>
-                                </Stack>
-                            </FormWrapper>
-                        </Paper>
-                    </>
+                    <Paper elevation={5} sx={{ padding: '1rem', margin: '1rem 0' }}>
+                        <Typography variant="h6">
+                            Task Details
+                        </Typography>
+                        <FormWrapper>
+                            <Stack direction="row" gap={1} flexWrap="wrap">
+                                <Chip label={task.displayName} color="info" />
+                                <Chip label={task.taskId} onClick={() => gotoTask(task.taskId)} />
+                            </Stack>
+                            <TaskFields
+                                templateDef={templateDef}
+                                originals={outputs}
+                                setResult={setOutputs}
+                            />
+                            <Stack direction="row" gap={1}>
+                                <Button color="info" variant="contained" type="submit" loading={loading}>
+                                    Submit
+                                </Button>
+                                <Button variant="contained" color="inherit" onClick={reset}>
+                                    Cancel
+                                </Button>
+                            </Stack>
+                        </FormWrapper>
+                    </Paper>
                 )}
             </form>
 
